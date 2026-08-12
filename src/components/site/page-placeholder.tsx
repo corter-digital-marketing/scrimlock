@@ -40,7 +40,7 @@ export function PagePlaceholder({
 
         <div className="frame-brass mt-10 w-full max-w-md rounded-sm bg-surface px-6 py-8">
           <p className="font-label text-xs tracking-widest text-brass uppercase">
-            Case pending
+            Coming soon
           </p>
           <p className="font-body mt-3 text-sm text-parchment-dim">
             {phaseNote}

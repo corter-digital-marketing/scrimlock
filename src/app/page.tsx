@@ -11,15 +11,15 @@ const tabCards = [
   {
     href: "/tournaments",
     icon: Trophy,
-    flavor: "The Bill",
+    tag: "Compete",
     title: "Tournaments",
     blurb:
-      "Organizers post fight cards with prize pools and rank gates. Enter solo or bring your syndicate.",
+      "Organizers post tournaments with prize pools and rank requirements. Enter solo or bring your team.",
   },
   {
     href: "/scrims",
     icon: Swords,
-    flavor: "Arrangements",
+    tag: "Practice",
     title: "Scrims",
     blurb:
       "Post 6v6 practice availability and find opponents by rank range, region, and time — in your own timezone.",
@@ -27,7 +27,7 @@ const tabCards = [
   {
     href: "/lft",
     icon: UserSearch,
-    flavor: "Notices",
+    tag: "Recruit",
     title: "LFT",
     blurb:
       "Players advertise preferred heroes and rank. Teams post open slots. No rigid roles — just what you play.",
@@ -67,15 +67,15 @@ export default function Home() {
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <div className="max-w-2xl">
             <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
-              A case file for the competitive scene
+              The competitive hub for Deadlock
             </p>
             <h1 className="font-display mt-4 text-5xl leading-[1.05] tracking-tight text-parchment sm:text-6xl">
-              The city runs on the{" "}
-              <span className="text-brass text-glow-brass">ranked ladder.</span>
+              Tournaments, scrims, and{" "}
+              <span className="text-brass text-glow-brass">teammates.</span>
             </h1>
             <p className="font-body mt-6 text-lg leading-relaxed text-parchment-dim">
               Deadlock Esports is where the community organizes tournaments,
-              arranges scrims, and finds a crew. One dossier, one ladder rank,
+              arranges scrims, and finds teammates. One profile, one rank,
               three ways to compete.
             </p>
             <div className="mt-9 flex flex-wrap gap-4">
@@ -86,7 +86,7 @@ export default function Home() {
                   "bg-brass text-primary-foreground hover:bg-brass/90 shadow-[0_0_0_1px_var(--brass-dim)]",
                 )}
               >
-                Open a Dossier
+                Sign Up
               </Link>
               <Link
                 href="/tournaments"
@@ -95,7 +95,7 @@ export default function Home() {
                   "border-brass-dim text-parchment hover:bg-surface-2 hover:text-brass",
                 )}
               >
-                Browse the Bill
+                Browse Tournaments
               </Link>
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function Home() {
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {tabCards.map(({ href, icon: Icon, flavor, title, blurb }) => (
+          {tabCards.map(({ href, icon: Icon, tag, title, blurb }) => (
             <Link
               key={href}
               href={href}
@@ -126,7 +126,7 @@ export default function Home() {
                   strokeWidth={1.5}
                 />
                 <span className="font-label text-[10px] tracking-widest text-brass-dim uppercase">
-                  {flavor}
+                  {tag}
                 </span>
               </div>
               <h3 className="font-display mt-5 text-xl text-parchment">
@@ -157,8 +157,8 @@ export default function Home() {
             The Ranked Ladder
           </h2>
           <p className="font-body mx-auto mt-4 max-w-xl text-parchment-dim">
-            Every dossier carries a rank medallion. Filters across
-            Tournaments, Scrims, and LFT all sort along this ladder.
+            Every profile shows a rank badge. Filters across Tournaments,
+            Scrims, and LFT all sort along this ladder.
           </p>
         </div>
 

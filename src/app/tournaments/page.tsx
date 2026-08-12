@@ -6,9 +6,9 @@ export const metadata: Metadata = { title: "Tournaments" };
 export default function TournamentsPage() {
   return (
     <PagePlaceholder
-      eyebrow="The Bill"
+      eyebrow="Compete"
       title="Tournaments"
-      description="Organizers post fight cards, players and squads sign up. Browsing, entries, and brackets land in Phase 6."
+      description="Organizers create tournaments with prize pools and rank requirements. Players and teams sign up to compete. Full browsing, registration, and brackets land in Phase 6."
       phaseNote="This tab is wired into the nav now as a placeholder. Creation, registration, and organizer tools arrive once accounts and teams exist."
     />
   );

@@ -1,8 +1,6 @@
 export type NavLink = {
   href: string;
   label: string;
-  /** Small in-world flavor label shown under the plain label on wide screens. */
-  flavor?: string;
 };
 
 /**
@@ -10,12 +8,10 @@ export type NavLink = {
  * must be separate, equally-weighted top-level nav items.
  */
 export const primaryNavLinks: NavLink[] = [
-  { href: "/tournaments", label: "Tournaments", flavor: "The Bill" },
-  { href: "/scrims", label: "Scrims", flavor: "Arrangements" },
-  { href: "/lft", label: "LFT", flavor: "Notices" },
+  { href: "/tournaments", label: "Tournaments" },
+  { href: "/scrims", label: "Scrims" },
+  { href: "/lft", label: "LFT" },
 ];
 
 /** Secondary nav — teams live in the nav per §4, profile lives in the user menu. */
-export const secondaryNavLinks: NavLink[] = [
-  { href: "/teams", label: "Teams", flavor: "Syndicates" },
-];
+export const secondaryNavLinks: NavLink[] = [{ href: "/teams", label: "Teams" }];

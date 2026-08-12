@@ -6,7 +6,7 @@
 
 /* ------------------------------------------------------------------
    Theme tokens — §6 "1940s occult-era New York"
-   Single fixed palette (no light mode): gaslit art-deco dossier.
+   Single fixed palette (no light mode): gaslit art-deco theme.
    ------------------------------------------------------------------ */
 @theme inline {
   --color-background: var(--background);

@@ -12,13 +12,11 @@ import { primaryNavLinks, secondaryNavLinks } from "@/lib/nav-links";
 function NavTab({
   href,
   label,
-  flavor,
   active,
   onClick,
 }: {
   href: string;
   label: string;
-  flavor?: string;
   active: boolean;
   onClick?: () => void;
 }) {
@@ -42,11 +40,6 @@ function NavTab({
       >
         {label}
       </span>
-      {flavor ? (
-        <span className="font-label hidden text-[10px] tracking-widest text-brass-dim/80 uppercase lg:block">
-          {flavor}
-        </span>
-      ) : null}
       <span
         className={cn(
           "absolute -bottom-[1px] left-1/2 h-[2px] -translate-x-1/2 bg-brass transition-weighted",

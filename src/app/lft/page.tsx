@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "LFT" };
 export default function LftPage() {
   return (
     <PagePlaceholder
-      eyebrow="Notices"
+      eyebrow="Find a Team"
       title="Looking For Team"
       description="Players advertise rank, preferred heroes, and region. Teams post open slots. Lands in Phase 4."
       phaseNote="This tab is wired into the nav now as a placeholder. The player finder and team finder views arrive once profiles and teams exist."

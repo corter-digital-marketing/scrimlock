@@ -64,7 +64,7 @@ export function SiteFooter() {
             trademark of Valve Corporation.
           </p>
           <p className="font-label tracking-widest uppercase">
-            Est. in the shadows of the city
+            Built by players, for players
           </p>
         </div>
       </div>
