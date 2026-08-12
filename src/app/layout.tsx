@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { GrainOverlay } from "@/components/site/grain-overlay";
 import { Toaster } from "@/components/ui/sonner";
+import { getCurrentUser } from "@/lib/supabase/auth";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -34,7 +35,9 @@ export const metadata: Metadata = {
     "The competitive hub for Valve's Deadlock: run and enter tournaments, arrange scrims, and find your crew.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="en"
@@ -43,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="relative min-h-full flex flex-col bg-void text-parchment font-sans">
         <GrainOverlay />
-        <SiteHeader />
+        <SiteHeader user={user} />
         <main className="relative z-0 flex-1">{children}</main>
         <SiteFooter />
         <Toaster />

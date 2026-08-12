@@ -5,9 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { SigilMark } from "@/components/site/sigil-mark";
+import { UserMenu } from "@/components/site/user-menu";
 import { primaryNavLinks, secondaryNavLinks } from "@/lib/nav-links";
+import { signOutAction } from "@/lib/actions/auth";
+import type { CurrentUser } from "@/lib/supabase/auth";
 
 function NavTab({
   href,
@@ -50,7 +53,7 @@ function NavTab({
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ user }: { user: CurrentUser | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -92,24 +95,30 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href="/login"
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "text-parchment hover:bg-surface-2 hover:text-brass",
-            )}
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/signup"
-            className={cn(
-              buttonVariants(),
-              "bg-brass text-primary-foreground hover:bg-brass/90 shadow-[0_0_0_1px_var(--brass-dim)]",
-            )}
-          >
-            Sign Up
-          </Link>
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "text-parchment hover:bg-surface-2 hover:text-brass",
+                )}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className={cn(
+                  buttonVariants(),
+                  "bg-brass text-primary-foreground hover:bg-brass/90 shadow-[0_0_0_1px_var(--brass-dim)]",
+                )}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -147,26 +156,49 @@ export function SiteHeader() {
             ))}
           </ul>
           <div className="mt-4 flex flex-col gap-2">
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "border-brass-dim",
-              )}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setOpen(false)}
-              className={cn(
-                buttonVariants(),
-                "bg-brass text-primary-foreground hover:bg-brass/90",
-              )}
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              <>
+                <p className="font-body px-1 text-sm text-parchment-dim">
+                  Signed in as{" "}
+                  <span className="text-parchment">
+                    {user.displayName ?? user.username ?? user.email}
+                  </span>
+                </p>
+                <Button
+                  variant="outline"
+                  className="border-brass-dim"
+                  onClick={() => {
+                    setOpen(false);
+                    void signOutAction();
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "border-brass-dim",
+                  )}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants(),
+                    "bg-brass text-primary-foreground hover:bg-brass/90",
+                  )}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       ) : null}
