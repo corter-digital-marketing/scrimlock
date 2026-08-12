@@ -1,0 +1,209 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------
+   Theme tokens — §6 "1940s occult-era New York"
+   Single fixed palette (no light mode): gaslit art-deco dossier.
+   ------------------------------------------------------------------ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-label: var(--font-label);
+  --font-mono: var(--font-body);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Raw theme palette, exposed as utilities: bg-brass, text-verdigris, border-oxblood, etc. */
+  --color-void: var(--bg-void);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-surface-2);
+  --color-brass: var(--brass);
+  --color-brass-dim: var(--brass-dim);
+  --color-verdigris: var(--verdigris);
+  --color-verdigris-dim: var(--verdigris-dim);
+  --color-oxblood: var(--oxblood);
+  --color-parchment: var(--parchment);
+  --color-parchment-dim: var(--parchment-dim);
+  --color-sigil: var(--sigil);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --ease-weighted: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* Raw palette — §6 color tokens, verbatim */
+  --bg-void: #14100e;
+  --bg-surface: #1e1815;
+  --bg-surface-2: #2a221d;
+  --brass: #c9a35c;
+  --brass-dim: #97753a;
+  --verdigris: #3a8c7e;
+  --verdigris-dim: #2e6b63;
+  --oxblood: #a83232;
+  --parchment: #e8dcc4;
+  --parchment-dim: #b3a488;
+  --sigil: #6f5bd6;
+
+  /* Semantic mapping consumed by shadcn/ui primitives */
+  --background: var(--bg-void);
+  --foreground: var(--parchment);
+  --card: var(--bg-surface);
+  --card-foreground: var(--parchment);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--parchment);
+  --primary: var(--brass);
+  --primary-foreground: #1a1310;
+  --secondary: var(--bg-surface-2);
+  --secondary-foreground: var(--parchment);
+  --muted: var(--bg-surface-2);
+  --muted-foreground: var(--parchment-dim);
+  --accent: var(--verdigris);
+  --accent-foreground: #f2fbf8;
+  --destructive: var(--oxblood);
+  --destructive-foreground: #fbeceb;
+  --border: color-mix(in oklab, var(--brass-dim) 40%, transparent);
+  --input: var(--bg-surface-2);
+  --ring: var(--brass);
+
+  --chart-1: var(--brass);
+  --chart-2: var(--verdigris);
+  --chart-3: var(--oxblood);
+  --chart-4: var(--sigil);
+  --chart-5: var(--parchment-dim);
+
+  --radius: 0.25rem;
+
+  --sidebar: var(--bg-surface);
+  --sidebar-foreground: var(--parchment);
+  --sidebar-primary: var(--brass);
+  --sidebar-primary-foreground: #1a1310;
+  --sidebar-accent: var(--bg-surface-2);
+  --sidebar-accent-foreground: var(--parchment);
+  --sidebar-border: color-mix(in oklab, var(--brass-dim) 40%, transparent);
+  --sidebar-ring: var(--brass);
+
+  /* Fonts, wired to next/font variables in layout.tsx */
+  --font-display: var(--font-cinzel), "Cinzel", serif;
+  --font-label: var(--font-special-elite), "Special Elite", monospace;
+  --font-body: var(--font-eb-garamond), "EB Garamond", serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Texture & motifs
+   ------------------------------------------------------------------ */
+@layer utilities {
+  /* Subtle film grain — static SVG turbulence, low opacity, texture not noise */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* Deco brass frame: thin border, faint inset hairline for a "cut into brass" feel */
+  .frame-brass {
+    border: 1px solid var(--brass-dim);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--brass) 12%, transparent),
+      0 1px 0 0 color-mix(in oklab, black 30%, transparent);
+  }
+
+  /* Deco corner flourish — four bracket corners, hero panels only */
+  .deco-corners {
+    position: relative;
+  }
+  .deco-corners::before,
+  .deco-corners::after,
+  .deco-corners > .corner-tl,
+  .deco-corners > .corner-br {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+  }
+  .deco-corners::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid var(--brass);
+    border-left: 2px solid var(--brass);
+  }
+  .deco-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid var(--brass);
+    border-right: 2px solid var(--brass);
+  }
+
+  .text-glow-brass {
+    text-shadow: 0 0 24px color-mix(in oklab, var(--brass) 35%, transparent);
+  }
+
+  .transition-weighted {
+    transition-timing-function: var(--ease-weighted);
+    transition-duration: 260ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
