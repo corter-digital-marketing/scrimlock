@@ -3,9 +3,8 @@ import { cn } from "@/lib/utils";
 import { subrankToRoman } from "@/lib/ranks";
 
 /**
- * An occult medallion: brass ring, verdigris glow, the official rank
- * emblem centered, with the roman-numeral subrank as a small chip at the
- * corner — the styled treatment for a rank + subrank pair (§6).
+ * The official rank emblem, with the roman-numeral subrank as a small
+ * chip at the corner — the styled treatment for a rank + subrank pair.
  */
 export function RankBadge({
   rankName,
@@ -32,22 +31,14 @@ export function RankBadge({
 
   return (
     <div className={cn("flex flex-col items-center gap-1.5", className)}>
-      <div
-        className={cn("relative shrink-0 rounded-full", dims)}
-        style={{
-          background:
-            "radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--verdigris) 55%, var(--bg-surface)), var(--verdigris-dim) 70%)",
-          boxShadow:
-            "0 0 0 2px var(--brass), 0 0 0 3px color-mix(in oklab, var(--brass-dim) 70%, transparent), inset 0 1px 3px color-mix(in oklab, black 40%, transparent)",
-        }}
-      >
+      <div className={cn("relative shrink-0", dims)}>
         {iconSrc ? (
           <Image
             src={iconSrc}
             alt=""
             width={96}
             height={96}
-            className="h-full w-full object-contain p-2"
+            className="h-full w-full object-contain"
           />
         ) : (
           <span className="absolute inset-0 m-auto h-2 w-2 rounded-full bg-parchment/70" />
