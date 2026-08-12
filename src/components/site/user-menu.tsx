@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, UserRound, Settings } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
 import {
   DropdownMenu,
@@ -43,6 +44,17 @@ export function UserMenu({ user }: { user: CurrentUser }) {
             {user.email}
           </p>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-brass-dim/30" />
+        {user.username ? (
+          <DropdownMenuItem render={<Link href={`/profile/${user.username}`} />}>
+            <UserRound />
+            View Profile
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuItem render={<Link href="/settings/profile" />}>
+          <Settings />
+          Edit Profile
+        </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-brass-dim/30" />
         <DropdownMenuItem
           variant="destructive"

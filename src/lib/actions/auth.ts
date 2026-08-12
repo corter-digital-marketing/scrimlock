@@ -22,6 +22,12 @@ async function getOrigin() {
   return `${proto}://${host}`;
 }
 
+/** Only ever redirect to a same-site path — never follow an open redirect. */
+function safeNext(next: FormDataEntryValue | string | null | undefined) {
+  if (typeof next !== "string") return "/";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+}
+
 export async function signUpAction(
   _prevState: AuthActionState,
   formData: FormData,
@@ -91,20 +97,27 @@ export async function loginAction(
     return { error: "Incorrect email or password." };
   }
 
-  redirect("/");
+  redirect(safeNext(formData.get("next")));
 }
 
-export async function signInWithGoogleAction() {
+export async function signInWithGoogleAction(
+  next: string | undefined,
+  // Required by the `.bind(null, next)` form-action signature — unused.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _formData: FormData,
+) {
   if (!isSupabaseConfigured()) {
     redirect("/login?error=not-configured");
   }
 
   const supabase = await createClient();
   const origin = await getOrigin();
+  const callbackUrl = new URL("/auth/callback", origin);
+  callbackUrl.searchParams.set("next", safeNext(next));
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
+    options: { redirectTo: callbackUrl.toString() },
   });
 
   if (error || !data.url) {

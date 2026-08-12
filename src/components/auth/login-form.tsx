@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 
 const initialState: AuthActionState = null;
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       {state?.error ? (
         <p
           role="alert"

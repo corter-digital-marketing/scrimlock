@@ -1,14 +1,28 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+
+const PROTECTED_PREFIXES = ["/settings"];
 
 /**
  * Runs on every request (excluding static assets) to keep the Supabase
- * auth session fresh. Route protection for create/manage pages lands
- * alongside those pages rather than here — see each route's own auth
- * check once it exists.
+ * auth session fresh, plus an optimistic redirect for signed-out visitors
+ * hitting a protected route. This is a fast, cookie-only check (no DB
+ * round trip) — each protected page also verifies the session itself,
+ * per Next's guidance not to rely on proxy as the only line of defense.
  */
 export async function proxy(request: NextRequest) {
-  const { supabaseResponse } = await updateSession(request);
+  const { supabaseResponse, user } = await updateSession(request);
+
+  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
+    request.nextUrl.pathname.startsWith(prefix),
+  );
+
+  if (isProtected && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return supabaseResponse;
 }
 

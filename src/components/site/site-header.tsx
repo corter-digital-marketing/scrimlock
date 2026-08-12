@@ -164,6 +164,28 @@ export function SiteHeader({ user }: { user: CurrentUser | null }) {
                     {user.displayName ?? user.username ?? user.email}
                   </span>
                 </p>
+                {user.username ? (
+                  <Link
+                    href={`/profile/${user.username}`}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "border-brass-dim",
+                    )}
+                  >
+                    View Profile
+                  </Link>
+                ) : null}
+                <Link
+                  href="/settings/profile"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "border-brass-dim",
+                  )}
+                >
+                  Edit Profile
+                </Link>
                 <Button
                   variant="outline"
                   className="border-brass-dim"

@@ -16,9 +16,9 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
   const errorMessage = error ? OAUTH_ERROR_MESSAGES[error] : undefined;
 
   return (
@@ -45,7 +45,7 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <GoogleAuthButton />
+        <GoogleAuthButton next={next} />
 
         <div
           aria-hidden="true"
@@ -56,7 +56,7 @@ export default async function LoginPage({
           <span className="h-px flex-1 bg-brass-dim/40" />
         </div>
 
-        <LoginForm />
+        <LoginForm next={next} />
       </div>
     </AuthCard>
   );
