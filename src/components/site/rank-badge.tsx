@@ -1,17 +1,21 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { subrankToRoman } from "@/lib/ranks";
 
 /**
- * An occult medallion: brass ring, verdigris fill, roman-numeral subrank
- * centered — the styled treatment for a rank + subrank pair (§6).
+ * An occult medallion: brass ring, verdigris glow, the official rank
+ * emblem centered, with the roman-numeral subrank as a small chip at the
+ * corner — the styled treatment for a rank + subrank pair (§6).
  */
 export function RankBadge({
   rankName,
+  iconSrc,
   subrank,
   size = "md",
   className,
 }: {
   rankName: string;
+  iconSrc?: string;
   subrank?: number | null;
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -19,35 +23,45 @@ export function RankBadge({
   const numeral = subrankToRoman(subrank);
   const dims =
     size === "lg" ? "h-20 w-20" : size === "sm" ? "h-9 w-9" : "h-12 w-12";
-  const numeralSize =
-    size === "lg" ? "text-xl" : size === "sm" ? "text-[10px]" : "text-sm";
+  const chipSize =
+    size === "lg"
+      ? "h-6 min-w-6 px-1 text-xs"
+      : size === "sm"
+        ? "h-4 min-w-4 px-0.5 text-[9px]"
+        : "h-5 min-w-5 px-1 text-[10px]";
 
   return (
     <div className={cn("flex flex-col items-center gap-1.5", className)}>
       <div
-        className={cn(
-          "relative flex items-center justify-center rounded-full",
-          dims,
-        )}
+        className={cn("relative shrink-0 rounded-full", dims)}
         style={{
           background:
-            "radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--verdigris) 65%, var(--bg-surface)), var(--verdigris-dim) 70%)",
+            "radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--verdigris) 55%, var(--bg-surface)), var(--verdigris-dim) 70%)",
           boxShadow:
             "0 0 0 2px var(--brass), 0 0 0 3px color-mix(in oklab, var(--brass-dim) 70%, transparent), inset 0 1px 3px color-mix(in oklab, black 40%, transparent)",
         }}
       >
+        {iconSrc ? (
+          <Image
+            src={iconSrc}
+            alt=""
+            width={96}
+            height={96}
+            className="h-full w-full object-contain p-2"
+          />
+        ) : (
+          <span className="absolute inset-0 m-auto h-2 w-2 rounded-full bg-parchment/70" />
+        )}
         {numeral ? (
           <span
             className={cn(
-              "font-display font-semibold text-parchment",
-              numeralSize,
+              "font-display absolute -right-1 -bottom-1 flex items-center justify-center rounded-full border border-brass bg-void font-semibold text-brass",
+              chipSize,
             )}
           >
             {numeral}
           </span>
-        ) : (
-          <span className="h-2 w-2 rounded-full bg-parchment/70" />
-        )}
+        ) : null}
       </div>
       <span className="font-label text-center text-[10px] tracking-widest text-parchment-dim uppercase">
         {rankName}

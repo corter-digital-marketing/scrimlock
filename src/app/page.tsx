@@ -167,6 +167,7 @@ export default function Home() {
             <RankBadge
               key={rank.id}
               rankName={rank.name}
+              iconSrc={rank.icon}
               subrank={rank.isPlacement ? null : ((rank.id % 6) + 1)}
             />
           ))}
