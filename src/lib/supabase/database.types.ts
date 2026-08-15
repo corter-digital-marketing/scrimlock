@@ -2,12 +2,81 @@
  * Hand-maintained until a live Supabase project exists to generate from
  * (`supabase gen types typescript --linked > src/lib/supabase/database.types.ts`).
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
- * `profiles`) — extend this as each phase's migration adds tables, or
- * regenerate wholesale once linked.
+ * `profiles`; Phase 3: `teams`, `team_members`) — extend this as each
+ * phase's migration adds tables, or regenerate wholesale once linked.
  */
+export type TeamRole = "owner" | "captain" | "player" | "sub";
+export type TeamMemberStatus = "pending" | "active";
+
 export type Database = {
   public: {
     Tables: {
+      teams: {
+        Row: {
+          id: string;
+          name: string;
+          tag: string;
+          region: string | null;
+          logo_url: string | null;
+          description: string | null;
+          owner_id: string;
+          is_recruiting: boolean;
+          recruiting_note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          tag: string;
+          region?: string | null;
+          logo_url?: string | null;
+          description?: string | null;
+          owner_id: string;
+          is_recruiting?: boolean;
+          recruiting_note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          tag?: string;
+          region?: string | null;
+          logo_url?: string | null;
+          description?: string | null;
+          owner_id?: string;
+          is_recruiting?: boolean;
+          recruiting_note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      team_members: {
+        Row: {
+          id: string;
+          team_id: string;
+          user_id: string;
+          role_on_team: TeamRole;
+          status: TeamMemberStatus;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          user_id: string;
+          role_on_team?: TeamRole;
+          status?: TeamMemberStatus;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          user_id?: string;
+          role_on_team?: TeamRole;
+          status?: TeamMemberStatus;
+          joined_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;

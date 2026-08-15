@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PROTECTED_PREFIXES = ["/settings"];
+// Signed-out-only optimistic check (path patterns, not full authorization —
+// e.g. "is this person a captain of *this* team" still happens page-side).
+const PROTECTED_PATTERNS = [/^\/settings(\/|$)/, /^\/teams\/new$/, /^\/teams\/[^/]+\/manage$/];
 
 /**
  * Runs on every request (excluding static assets) to keep the Supabase
@@ -13,8 +15,8 @@ const PROTECTED_PREFIXES = ["/settings"];
 export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    request.nextUrl.pathname.startsWith(prefix),
+  const isProtected = PROTECTED_PATTERNS.some((pattern) =>
+    pattern.test(request.nextUrl.pathname),
   );
 
   if (isProtected && !user) {
