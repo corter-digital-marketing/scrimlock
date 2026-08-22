@@ -39,29 +39,6 @@ create policy "authed users create a team they own"
   to authenticated
   with check (owner_id = auth.uid());
 
-create policy "owner or captains update team"
-  on public.teams
-  for update
-  to authenticated
-  using (
-    exists (
-      select 1 from public.team_members tm
-      where tm.team_id = teams.id
-        and tm.user_id = auth.uid()
-        and tm.status = 'active'
-        and tm.role_on_team in ('owner', 'captain')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.team_members tm
-      where tm.team_id = teams.id
-        and tm.user_id = auth.uid()
-        and tm.status = 'active'
-        and tm.role_on_team in ('owner', 'captain')
-    )
-  );
-
 create policy "owner deletes team"
   on public.teams
   for delete
@@ -145,6 +122,32 @@ create policy "users remove themselves"
   for delete
   to authenticated
   using (user_id = auth.uid());
+
+-- This has to come after team_members exists (it's referenced in the
+-- USING/WITH CHECK subquery, and Postgres validates that at CREATE POLICY
+-- time) — everything else on `teams` was defined right after that table.
+create policy "owner or captains update team"
+  on public.teams
+  for update
+  to authenticated
+  using (
+    exists (
+      select 1 from public.team_members tm
+      where tm.team_id = teams.id
+        and tm.user_id = auth.uid()
+        and tm.status = 'active'
+        and tm.role_on_team in ('owner', 'captain')
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.team_members tm
+      where tm.team_id = teams.id
+        and tm.user_id = auth.uid()
+        and tm.status = 'active'
+        and tm.role_on_team in ('owner', 'captain')
+    )
+  );
 
 -- ---------------------------------------------------------------------
 -- Bootstrap: creating a team auto-seats its owner as an active member.

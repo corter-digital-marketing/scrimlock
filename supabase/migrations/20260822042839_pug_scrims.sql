@@ -43,18 +43,6 @@ create table public.pug_parties (
 
 alter table public.pug_parties enable row level security;
 
-create policy "members read their party"
-  on public.pug_parties
-  for select
-  to authenticated
-  using (
-    leader_id = auth.uid()
-    or exists (
-      select 1 from public.pug_party_members pm
-      where pm.party_id = pug_parties.id and pm.user_id = auth.uid()
-    )
-  );
-
 create policy "users create a party they lead"
   on public.pug_parties
   for insert
@@ -146,6 +134,21 @@ create trigger on_party_created
   for each row
   execute function public.handle_new_party();
 
+-- Has to come after pug_party_members exists (referenced in the subquery,
+-- and Postgres validates that at CREATE POLICY time) — everything else on
+-- pug_parties was defined right after that table.
+create policy "members read their party"
+  on public.pug_parties
+  for select
+  to authenticated
+  using (
+    leader_id = auth.uid()
+    or exists (
+      select 1 from public.pug_party_members pm
+      where pm.party_id = pug_parties.id and pm.user_id = auth.uid()
+    )
+  );
+
 -- ---------------------------------------------------------------------
 -- pug_matches / pug_match_players / pug_match_votes
 -- ---------------------------------------------------------------------
@@ -164,20 +167,6 @@ comment on table public.pug_matches is
   'A formed 6v6 PUG match. Created only by the service-role matchmaker, never directly by a player.';
 
 alter table public.pug_matches enable row level security;
-
--- Participant-only, not public: lobby_code is on this row, and RLS can't
--- filter it out column-by-column. A future public results/leaderboard
--- view can select the non-sensitive columns explicitly.
-create policy "match players read their match"
-  on public.pug_matches
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1 from public.pug_match_players mp
-      where mp.match_id = pug_matches.id and mp.user_id = auth.uid()
-    )
-  );
 
 create policy "lobby maker posts the lobby code"
   on public.pug_matches
@@ -234,6 +223,21 @@ create policy "match rosters are publicly readable"
 
 -- No insert/update/delete policy for authenticated: rosters are set once
 -- by matchmaking and elo_after only by result resolution, both service-role.
+
+-- Has to come after pug_match_players exists (referenced in the subquery) —
+-- participant-only, not public: lobby_code is on this row, and RLS can't
+-- filter it out column-by-column. A future public results/leaderboard
+-- view can select the non-sensitive columns explicitly.
+create policy "match players read their match"
+  on public.pug_matches
+  for select
+  to authenticated
+  using (
+    exists (
+      select 1 from public.pug_match_players mp
+      where mp.match_id = pug_matches.id and mp.user_id = auth.uid()
+    )
+  );
 
 -- ---------------------------------------------------------------------
 create table public.pug_match_votes (
