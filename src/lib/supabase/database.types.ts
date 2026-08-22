@@ -2,15 +2,87 @@
  * Hand-maintained until a live Supabase project exists to generate from
  * (`supabase gen types typescript --linked > src/lib/supabase/database.types.ts`).
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
- * `profiles`; Phase 3: `teams`, `team_members`) — extend this as each
- * phase's migration adds tables, or regenerate wholesale once linked.
+ * `profiles`; Phase 3: `teams`, `team_members`; Phase 5: `scrims`,
+ * `scrim_responses`) — extend this as each phase's migration adds
+ * tables, or regenerate wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
 export type TeamMemberStatus = "pending" | "active";
+export type ScrimStatus = "open" | "matched" | "cancelled";
+export type ScrimResponseStatus = "pending" | "accepted" | "declined";
 
 export type Database = {
   public: {
     Tables: {
+      scrims: {
+        Row: {
+          id: string;
+          posted_by: string;
+          team_id: string | null;
+          region: string;
+          min_rank_id: number | null;
+          max_rank_id: number | null;
+          scheduled_for: string;
+          notes: string | null;
+          status: ScrimStatus;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          posted_by: string;
+          team_id?: string | null;
+          region: string;
+          min_rank_id?: number | null;
+          max_rank_id?: number | null;
+          scheduled_for: string;
+          notes?: string | null;
+          status?: ScrimStatus;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          posted_by?: string;
+          team_id?: string | null;
+          region?: string;
+          min_rank_id?: number | null;
+          max_rank_id?: number | null;
+          scheduled_for?: string;
+          notes?: string | null;
+          status?: ScrimStatus;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      scrim_responses: {
+        Row: {
+          id: string;
+          scrim_id: string;
+          responder_id: string;
+          team_id: string | null;
+          message: string | null;
+          status: ScrimResponseStatus;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          scrim_id: string;
+          responder_id: string;
+          team_id?: string | null;
+          message?: string | null;
+          status?: ScrimResponseStatus;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          scrim_id?: string;
+          responder_id?: string;
+          team_id?: string | null;
+          message?: string | null;
+          status?: ScrimResponseStatus;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       teams: {
         Row: {
           id: string;

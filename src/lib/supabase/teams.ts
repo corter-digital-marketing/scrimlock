@@ -121,6 +121,25 @@ export function canManage(role: TeamRole | undefined) {
   return role === "owner" || role === "captain";
 }
 
+/** Teams the user owns or captains — for "post/respond as your team" pickers. */
+export async function getManagedTeams(userId: string): Promise<TeamRow[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data: memberships } = await supabase
+    .from("team_members")
+    .select("team_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .in("role_on_team", ["owner", "captain"]);
+
+  const teamIds = (memberships ?? []).map((m) => m.team_id);
+  if (teamIds.length === 0) return [];
+
+  const { data } = await supabase.from("teams").select("*").in("id", teamIds);
+  return data ?? [];
+}
+
 /** One grouped query instead of one count-query per team on the browse page. */
 export async function getActiveMemberCounts(
   teamIds: string[],

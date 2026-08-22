@@ -3,7 +3,12 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 // Signed-out-only optimistic check (path patterns, not full authorization —
 // e.g. "is this person a captain of *this* team" still happens page-side).
-const PROTECTED_PATTERNS = [/^\/settings(\/|$)/, /^\/teams\/new$/, /^\/teams\/[^/]+\/manage$/];
+const PROTECTED_PATTERNS = [
+  /^\/settings(\/|$)/,
+  /^\/teams\/new$/,
+  /^\/teams\/[^/]+\/manage$/,
+  /^\/scrims\/new$/,
+];
 
 /**
  * Runs on every request (excluding static assets) to keep the Supabase
