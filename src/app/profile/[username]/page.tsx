@@ -4,9 +4,11 @@ import { notFound } from "next/navigation";
 import { getProfileByUsername } from "@/lib/supabase/profiles";
 import { getHeroesByIds } from "@/lib/supabase/heroes";
 import { getCurrentUser } from "@/lib/supabase/auth";
+import { getFriendship, getFriends } from "@/lib/supabase/friends";
 import { getRankById } from "@/lib/ranks";
 import { RankBadge } from "@/components/site/rank-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
+import { FriendButton } from "@/components/profile/friend-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,9 +33,26 @@ export default async function ProfilePage({ params }: { params: Params }) {
 
   if (!profile) notFound();
 
-  const preferredHeroes = await getHeroesByIds(profile.preferred_heroes);
+  const [preferredHeroes, friends, friendship] = await Promise.all([
+    getHeroesByIds(profile.preferred_heroes),
+    getFriends(profile.id),
+    currentUser && currentUser.id !== profile.id
+      ? getFriendship(currentUser.id, profile.id)
+      : Promise.resolve(null),
+  ]);
   const rank = getRankById(profile.rank_id);
   const isOwnProfile = currentUser?.id === profile.id;
+  const socialLinks = (
+    [
+      ["YouTube", profile.youtube_url],
+      ["Twitch", profile.twitch_url],
+      ["StatLocker", profile.statlocker_url],
+      ["X", profile.x_url],
+      ["Instagram", profile.instagram_url],
+    ] satisfies [string, string | null][]
+  )
+    .filter((entry): entry is [string, string] => Boolean(entry[1]))
+    .map(([label, url]) => ({ label, url }));
   const initials = (profile.display_name || profile.username)
     .slice(0, 2)
     .toUpperCase();
@@ -71,6 +90,13 @@ export default async function ProfilePage({ params }: { params: Params }) {
                 >
                   Edit Profile
                 </Link>
+              ) : currentUser ? (
+                <FriendButton
+                  profileId={profile.id}
+                  profileUsername={profile.username}
+                  currentUserId={currentUser.id}
+                  friendship={friendship}
+                />
               ) : null}
             </div>
 
@@ -96,6 +122,22 @@ export default async function ProfilePage({ params }: { params: Params }) {
 
         {profile.bio ? (
           <p className="font-body mt-6 text-parchment-dim">{profile.bio}</p>
+        ) : null}
+
+        {socialLinks.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-3">
+            {socialLinks.map(({ label, url }) => (
+              <a
+                key={label}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-label rounded-full border border-brass-dim/50 px-3 py-1 text-[10px] tracking-widest text-parchment-dim uppercase transition-weighted hover:border-brass hover:text-brass"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
         ) : null}
 
         <DecoDivider className="my-8" />
@@ -145,6 +187,38 @@ export default async function ProfilePage({ params }: { params: Params }) {
             ) : null}
           </div>
         </div>
+
+        {friends.length > 0 ? (
+          <>
+            <DecoDivider className="my-8" />
+            <div>
+              <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
+                Friends ({friends.length})
+              </p>
+              <div className="flex flex-wrap gap-4">
+                {friends.map((friend) => (
+                  <Link
+                    key={friend.id}
+                    href={`/profile/${friend.username}`}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    <Avatar className="border border-brass-dim/50">
+                      {friend.avatar_url ? (
+                        <AvatarImage src={friend.avatar_url} alt="" />
+                      ) : null}
+                      <AvatarFallback className="font-label bg-surface-2 text-xs text-brass">
+                        {friend.display_name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-label max-w-16 truncate text-[10px] tracking-widest text-parchment-dim uppercase">
+                      {friend.display_name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   );

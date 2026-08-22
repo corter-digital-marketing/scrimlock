@@ -11,6 +11,7 @@ const PROTECTED_PATTERNS = [
   /^\/tournaments\/new$/,
   /^\/tournaments\/[^/]+\/manage$/,
   /^\/admin(\/|$)/,
+  /^\/friends(\/|$)/,
 ];
 
 /**

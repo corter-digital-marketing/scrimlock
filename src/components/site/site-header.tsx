@@ -186,6 +186,16 @@ export function SiteHeader({ user }: { user: CurrentUser | null }) {
                 >
                   Edit Profile
                 </Link>
+                <Link
+                  href="/friends"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "border-brass-dim",
+                  )}
+                >
+                  Friends
+                </Link>
                 {user.isAdmin ? (
                   <Link
                     href="/admin"

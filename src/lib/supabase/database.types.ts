@@ -3,9 +3,9 @@
  * (`supabase gen types typescript --linked > src/lib/supabase/database.types.ts`).
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
  * `profiles`; Phase 3: `teams`, `team_members`; Phase 5: `scrims`,
- * `scrim_responses`; Phase 6: `tournaments`, `tournament_registrations`)
- * — extend this as each phase's migration adds tables, or regenerate
- * wholesale once linked.
+ * `scrim_responses`; Phase 6: `tournaments`, `tournament_registrations`;
+ * ScrimLock: `friendships`) — extend this as each migration adds tables,
+ * or regenerate wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
 export type TeamMemberStatus = "pending" | "active";
@@ -14,10 +14,35 @@ export type ScrimResponseStatus = "pending" | "accepted" | "declined";
 export type TournamentEntryType = "solo" | "team";
 export type TournamentStatus = "draft" | "open" | "closed" | "in_progress" | "completed";
 export type RegistrationStatus = "pending" | "confirmed" | "withdrawn";
+export type FriendshipStatus = "pending" | "accepted";
 
 export type Database = {
   public: {
     Tables: {
+      friendships: {
+        Row: {
+          id: string;
+          requester_id: string;
+          addressee_id: string;
+          status: FriendshipStatus;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          requester_id: string;
+          addressee_id: string;
+          status?: FriendshipStatus;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          requester_id?: string;
+          addressee_id?: string;
+          status?: FriendshipStatus;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       tournaments: {
         Row: {
           id: string;
@@ -245,6 +270,11 @@ export type Database = {
           avatar_url: string | null;
           bio: string | null;
           discord_handle: string | null;
+          youtube_url: string | null;
+          twitch_url: string | null;
+          statlocker_url: string | null;
+          x_url: string | null;
+          instagram_url: string | null;
           region: string | null;
           timezone: string | null;
           rank_id: number | null;
@@ -263,6 +293,11 @@ export type Database = {
           avatar_url?: string | null;
           bio?: string | null;
           discord_handle?: string | null;
+          youtube_url?: string | null;
+          twitch_url?: string | null;
+          statlocker_url?: string | null;
+          x_url?: string | null;
+          instagram_url?: string | null;
           region?: string | null;
           timezone?: string | null;
           rank_id?: number | null;
@@ -281,6 +316,11 @@ export type Database = {
           avatar_url?: string | null;
           bio?: string | null;
           discord_handle?: string | null;
+          youtube_url?: string | null;
+          twitch_url?: string | null;
+          statlocker_url?: string | null;
+          x_url?: string | null;
+          instagram_url?: string | null;
           region?: string | null;
           timezone?: string | null;
           rank_id?: number | null;

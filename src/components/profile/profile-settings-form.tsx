@@ -197,6 +197,41 @@ export function ProfileSettingsForm({
         </div>
       </section>
 
+      {/* Social links */}
+      <section className="flex flex-col gap-5">
+        <p className="font-label text-xs tracking-widest text-verdigris uppercase">
+          Social links
+        </p>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          {(
+            [
+              ["youtubeUrl", "YouTube", profile.youtube_url],
+              ["twitchUrl", "Twitch", profile.twitch_url],
+              ["statlockerUrl", "StatLocker", profile.statlocker_url],
+              ["xUrl", "X", profile.x_url],
+              ["instagramUrl", "Instagram", profile.instagram_url],
+            ] as const
+          ).map(([name, label, value]) => (
+            <div key={name} className="flex flex-col gap-1.5">
+              <Label htmlFor={name} className={fieldLabelClass()}>
+                {label}
+              </Label>
+              <Input
+                id={name}
+                name={name}
+                type="url"
+                placeholder="https://…"
+                defaultValue={value ?? ""}
+                className="border-brass-dim/60 bg-surface-2"
+                aria-invalid={!!state?.fieldErrors?.[name]}
+              />
+              <FieldError messages={state?.fieldErrors?.[name]} />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Region & timezone */}
       <section className="flex flex-col gap-5">
         <p className="font-label text-xs tracking-widest text-verdigris uppercase">
