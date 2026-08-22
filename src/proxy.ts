@@ -8,6 +8,8 @@ const PROTECTED_PATTERNS = [
   /^\/teams\/new$/,
   /^\/teams\/[^/]+\/manage$/,
   /^\/scrims\/new$/,
+  /^\/tournaments\/new$/,
+  /^\/tournaments\/[^/]+\/manage$/,
 ];
 
 /**

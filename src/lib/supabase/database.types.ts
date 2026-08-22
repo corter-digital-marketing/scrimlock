@@ -3,17 +3,105 @@
  * (`supabase gen types typescript --linked > src/lib/supabase/database.types.ts`).
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
  * `profiles`; Phase 3: `teams`, `team_members`; Phase 5: `scrims`,
- * `scrim_responses`) — extend this as each phase's migration adds
- * tables, or regenerate wholesale once linked.
+ * `scrim_responses`; Phase 6: `tournaments`, `tournament_registrations`)
+ * — extend this as each phase's migration adds tables, or regenerate
+ * wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
 export type TeamMemberStatus = "pending" | "active";
 export type ScrimStatus = "open" | "matched" | "cancelled";
 export type ScrimResponseStatus = "pending" | "accepted" | "declined";
+export type TournamentEntryType = "solo" | "team";
+export type TournamentStatus = "draft" | "open" | "closed" | "in_progress" | "completed";
+export type RegistrationStatus = "pending" | "confirmed" | "withdrawn";
 
 export type Database = {
   public: {
     Tables: {
+      tournaments: {
+        Row: {
+          id: string;
+          title: string;
+          organizer_id: string;
+          description: string;
+          format: string | null;
+          region: string;
+          prize_pool: string | null;
+          entry_type: TournamentEntryType;
+          max_participants: number;
+          min_rank_id: number | null;
+          max_rank_id: number | null;
+          starts_at: string;
+          registration_closes_at: string;
+          status: TournamentStatus;
+          banner_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          organizer_id: string;
+          description?: string;
+          format?: string | null;
+          region: string;
+          prize_pool?: string | null;
+          entry_type?: TournamentEntryType;
+          max_participants: number;
+          min_rank_id?: number | null;
+          max_rank_id?: number | null;
+          starts_at: string;
+          registration_closes_at: string;
+          status?: TournamentStatus;
+          banner_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          organizer_id?: string;
+          description?: string;
+          format?: string | null;
+          region?: string;
+          prize_pool?: string | null;
+          entry_type?: TournamentEntryType;
+          max_participants?: number;
+          min_rank_id?: number | null;
+          max_rank_id?: number | null;
+          starts_at?: string;
+          registration_closes_at?: string;
+          status?: TournamentStatus;
+          banner_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      tournament_registrations: {
+        Row: {
+          id: string;
+          tournament_id: string;
+          user_id: string | null;
+          team_id: string | null;
+          status: RegistrationStatus;
+          registered_at: string;
+        };
+        Insert: {
+          id?: string;
+          tournament_id: string;
+          user_id?: string | null;
+          team_id?: string | null;
+          status?: RegistrationStatus;
+          registered_at?: string;
+        };
+        Update: {
+          id?: string;
+          tournament_id?: string;
+          user_id?: string | null;
+          team_id?: string | null;
+          status?: RegistrationStatus;
+          registered_at?: string;
+        };
+        Relationships: [];
+      };
       scrims: {
         Row: {
           id: string;
