@@ -4,10 +4,12 @@ export type NavLink = {
 };
 
 /**
- * The three primary tabs — hard requirement (§4): Tournaments, Scrims, and LFT
- * must be separate, equally-weighted top-level nav items.
+ * Tournaments, Scrims, and LFT are a hard requirement (§4): separate,
+ * equally-weighted top-level nav items. PUG leads the list — it's the
+ * main feature (fast, ELO-matched 6v6 queue), so it gets first billing.
  */
 export const primaryNavLinks: NavLink[] = [
+  { href: "/pug", label: "PUG" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/scrims", label: "Scrims" },
   { href: "/lft", label: "LFT" },

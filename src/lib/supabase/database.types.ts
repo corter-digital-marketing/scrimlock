@@ -4,8 +4,10 @@
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
  * `profiles`; Phase 3: `teams`, `team_members`; Phase 5: `scrims`,
  * `scrim_responses`; Phase 6: `tournaments`, `tournament_registrations`;
- * ScrimLock: `friendships`, `conversations`, `messages`) — extend this as
- * each migration adds tables, or regenerate wholesale once linked.
+ * ScrimLock: `friendships`, `conversations`, `messages`, `pug_parties`,
+ * `pug_party_members`, `pug_matches`, `pug_match_players`,
+ * `pug_match_votes`, `pug_queue_entries`) — extend this as each
+ * migration adds tables, or regenerate wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
 export type TeamMemberStatus = "pending" | "invited" | "active";
@@ -15,10 +17,181 @@ export type TournamentEntryType = "solo" | "team";
 export type TournamentStatus = "draft" | "open" | "closed" | "in_progress" | "completed";
 export type RegistrationStatus = "pending" | "confirmed" | "withdrawn";
 export type FriendshipStatus = "pending" | "accepted";
+export type PugPartyMemberStatus = "invited" | "active";
+export type PugMatchStatus = "lobby_pending" | "in_progress" | "completed";
+export type PugQueueStatus = "queued" | "matched";
 
 export type Database = {
   public: {
     Tables: {
+      pug_parties: {
+        Row: {
+          id: string;
+          leader_id: string;
+          region: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          leader_id: string;
+          region: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          leader_id?: string;
+          region?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      pug_party_members: {
+        Row: {
+          id: string;
+          party_id: string;
+          user_id: string;
+          status: PugPartyMemberStatus;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          party_id: string;
+          user_id: string;
+          status?: PugPartyMemberStatus;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          party_id?: string;
+          user_id?: string;
+          status?: PugPartyMemberStatus;
+          joined_at?: string;
+        };
+        Relationships: [];
+      };
+      pug_matches: {
+        Row: {
+          id: string;
+          region: string;
+          status: PugMatchStatus;
+          lobby_maker_id: string;
+          lobby_code: string | null;
+          winning_team: number | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          region: string;
+          status?: PugMatchStatus;
+          lobby_maker_id: string;
+          lobby_code?: string | null;
+          winning_team?: number | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          region?: string;
+          status?: PugMatchStatus;
+          lobby_maker_id?: string;
+          lobby_code?: string | null;
+          winning_team?: number | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      pug_match_players: {
+        Row: {
+          id: string;
+          match_id: string;
+          user_id: string;
+          team: number;
+          elo_before: number;
+          elo_after: number | null;
+        };
+        Insert: {
+          id?: string;
+          match_id: string;
+          user_id: string;
+          team: number;
+          elo_before: number;
+          elo_after?: number | null;
+        };
+        Update: {
+          id?: string;
+          match_id?: string;
+          user_id?: string;
+          team?: number;
+          elo_before?: number;
+          elo_after?: number | null;
+        };
+        Relationships: [];
+      };
+      pug_match_votes: {
+        Row: {
+          id: string;
+          match_id: string;
+          voter_id: string;
+          voted_team: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          match_id: string;
+          voter_id: string;
+          voted_team: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          match_id?: string;
+          voter_id?: string;
+          voted_team?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      pug_queue_entries: {
+        Row: {
+          id: string;
+          region: string;
+          leader_id: string;
+          party_id: string | null;
+          user_ids: string[];
+          size: number;
+          elo: number;
+          status: PugQueueStatus;
+          matched_into: string | null;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          region: string;
+          leader_id: string;
+          party_id?: string | null;
+          user_ids: string[];
+          size: number;
+          elo: number;
+          status?: PugQueueStatus;
+          matched_into?: string | null;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          region?: string;
+          leader_id?: string;
+          party_id?: string | null;
+          user_ids?: string[];
+          size?: number;
+          elo?: number;
+          status?: PugQueueStatus;
+          matched_into?: string | null;
+          joined_at?: string;
+        };
+        Relationships: [];
+      };
       conversations: {
         Row: {
           id: string;
@@ -328,6 +501,7 @@ export type Database = {
           playstyle_note: string | null;
           is_lft: boolean;
           is_admin: boolean;
+          pug_elo: number;
           created_at: string;
           updated_at: string;
         };
@@ -351,6 +525,7 @@ export type Database = {
           playstyle_note?: string | null;
           is_lft?: boolean;
           is_admin?: boolean;
+          pug_elo?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -374,6 +549,7 @@ export type Database = {
           playstyle_note?: string | null;
           is_lft?: boolean;
           is_admin?: boolean;
+          pug_elo?: number;
           created_at?: string;
           updated_at?: string;
         };

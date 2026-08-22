@@ -3,6 +3,15 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 // Signed-out-only optimistic check (path patterns, not full authorization —
 // e.g. "is this person a captain of *this* team" still happens page-side).
+//
+// This is also the ONLY reliable way to redirect a signed-out visitor on a
+// direct/fresh navigation in this app: page-level `redirect()` (and
+// `notFound()`) calls from deep Server Components render the right content
+// but don't flip the HTTP status code on a fresh GET (verified in both dev
+// and a production build — status stays 200 either way, though client-side
+// in-app navigation isn't affected). `/pug/[matchId]` avoids `notFound()`
+// entirely for that reason (see the page) and leans on this list instead
+// of its own `redirect()` for the signed-out case.
 const PROTECTED_PATTERNS = [
   /^\/settings(\/|$)/,
   /^\/teams\/new$/,
@@ -13,6 +22,7 @@ const PROTECTED_PATTERNS = [
   /^\/admin(\/|$)/,
   /^\/friends(\/|$)/,
   /^\/messages(\/|$)/,
+  /^\/pug\/[^/]+$/,
 ];
 
 /**

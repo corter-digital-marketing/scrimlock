@@ -1,0 +1,104 @@
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type { Database } from "@/lib/supabase/database.types";
+
+export type PugMatchRow = Database["public"]["Tables"]["pug_matches"]["Row"];
+export type PugMatchPlayerRow = Database["public"]["Tables"]["pug_match_players"]["Row"];
+export type PugMatchVoteRow = Database["public"]["Tables"]["pug_match_votes"]["Row"];
+export type PugQueueEntryRow = Database["public"]["Tables"]["pug_queue_entries"]["Row"];
+
+export type MatchPlayerEntry = PugMatchPlayerRow & {
+  profile: { username: string; display_name: string; avatar_url: string | null } | null;
+};
+
+export async function getMatchById(id: string): Promise<PugMatchRow | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase.from("pug_matches").select("*").eq("id", id).maybeSingle();
+  return data ?? null;
+}
+
+export async function getMatchPlayers(matchId: string): Promise<MatchPlayerEntry[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data: players } = await supabase
+    .from("pug_match_players")
+    .select("*")
+    .eq("match_id", matchId);
+
+  const rows = players ?? [];
+  if (rows.length === 0) return [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .in(
+      "id",
+      rows.map((r) => r.user_id),
+    );
+  const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  return rows.map((r) => ({ ...r, profile: byId.get(r.user_id) ?? null }));
+}
+
+export async function getMatchVotes(matchId: string): Promise<PugMatchVoteRow[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase.from("pug_match_votes").select("*").eq("match_id", matchId);
+  return data ?? [];
+}
+
+/** An unresolved match (not yet completed) the user is currently part of. */
+export async function getMyActiveMatch(userId: string): Promise<PugMatchRow | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const { data: playerRows } = await supabase
+    .from("pug_match_players")
+    .select("match_id")
+    .eq("user_id", userId);
+
+  const matchIds = (playerRows ?? []).map((r) => r.match_id);
+  if (matchIds.length === 0) return null;
+
+  const { data } = await supabase
+    .from("pug_matches")
+    .select("*")
+    .in("id", matchIds)
+    .neq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+export async function getMyQueueEntry(userId: string): Promise<PugQueueEntryRow | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pug_queue_entries")
+    .select("*")
+    .eq("leader_id", userId)
+    .eq("status", "queued")
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+export async function getQueueCount(region: string): Promise<number> {
+  if (!isSupabaseConfigured()) return 0;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pug_queue_entries")
+    .select("size")
+    .eq("region", region)
+    .eq("status", "queued");
+
+  return (data ?? []).reduce((sum, r) => sum + r.size, 0);
+}
