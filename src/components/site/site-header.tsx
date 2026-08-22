@@ -186,6 +186,18 @@ export function SiteHeader({ user }: { user: CurrentUser | null }) {
                 >
                   Edit Profile
                 </Link>
+                {user.isAdmin ? (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "border-brass-dim",
+                    )}
+                  >
+                    Admin
+                  </Link>
+                ) : null}
                 <Button
                   variant="outline"
                   className="border-brass-dim"

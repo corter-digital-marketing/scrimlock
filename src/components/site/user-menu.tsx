@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, UserRound, Settings } from "lucide-react";
+import { LogOut, UserRound, Settings, ShieldCheck } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
 import {
   DropdownMenu,
@@ -55,6 +55,12 @@ export function UserMenu({ user }: { user: CurrentUser }) {
           <Settings />
           Edit Profile
         </DropdownMenuItem>
+        {user.isAdmin ? (
+          <DropdownMenuItem render={<Link href="/admin" />}>
+            <ShieldCheck />
+            Admin
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator className="bg-brass-dim/30" />
         <DropdownMenuItem
           variant="destructive"
