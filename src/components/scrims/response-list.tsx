@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -8,7 +9,7 @@ import {
   type SimpleActionResult,
 } from "@/lib/actions/scrims";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ScrimResponseEntry } from "@/lib/supabase/scrims";
 
@@ -55,9 +56,20 @@ export function ResponseList({
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <p className="font-body truncate text-sm text-parchment">
-              {r.team ? `${r.team.name} [${r.team.tag}]` : (r.profile?.display_name ?? "Unknown")}
-            </p>
+            {r.team ? (
+              <p className="font-body truncate text-sm text-parchment">
+                {r.team.name} [{r.team.tag}]
+              </p>
+            ) : r.profile ? (
+              <Link
+                href={`/profile/${r.profile.username}`}
+                className="font-body block truncate text-sm text-parchment hover:text-brass"
+              >
+                {r.profile.display_name}
+              </Link>
+            ) : (
+              <p className="font-body truncate text-sm text-parchment-dim">Unknown</p>
+            )}
             {r.message ? (
               <p className="font-body truncate text-xs text-parchment-dim">
                 {r.message}
@@ -67,6 +79,14 @@ export function ResponseList({
 
           {r.status === "pending" && canManage ? (
             <div className="flex gap-2">
+              {r.profile ? (
+                <Link
+                  href={`/messages/${r.profile.username}`}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-brass-dim")}
+                >
+                  Message
+                </Link>
+              ) : null}
               <Button
                 type="button"
                 size="sm"

@@ -16,6 +16,7 @@ import { RespondForm } from "@/components/scrims/respond-form";
 import { ResponseList } from "@/components/scrims/response-list";
 import { ScrimPosterActions } from "@/components/scrims/scrim-poster-actions";
 import { CancelResponseButton } from "@/components/scrims/cancel-response-button";
+import { MessageButton } from "@/components/messages/message-button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -82,16 +83,21 @@ export default async function ScrimPage({ params }: { params: Params }) {
               {scrim.region}
             </p>
           </div>
-          <span
-            className={cn(
-              "font-label rounded-full border px-2.5 py-1 text-[10px] tracking-widest uppercase",
-              scrim.status === "open" && "border-verdigris text-verdigris",
-              scrim.status === "matched" && "border-brass text-brass",
-              scrim.status === "cancelled" && "border-oxblood/60 text-oxblood",
-            )}
-          >
-            {STATUS_LABEL[scrim.status]}
-          </span>
+          <div className="flex items-center gap-2">
+            {!isPoster && currentUser && poster ? (
+              <MessageButton username={poster.username} />
+            ) : null}
+            <span
+              className={cn(
+                "font-label rounded-full border px-2.5 py-1 text-[10px] tracking-widest uppercase",
+                scrim.status === "open" && "border-verdigris text-verdigris",
+                scrim.status === "matched" && "border-brass text-brass",
+                scrim.status === "cancelled" && "border-oxblood/60 text-oxblood",
+              )}
+            >
+              {STATUS_LABEL[scrim.status]}
+            </span>
+          </div>
         </div>
 
         <p className="font-label mt-4 text-xs tracking-widest text-parchment-dim uppercase">

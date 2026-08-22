@@ -3,8 +3,10 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTeamById, getTeamRoster, getMembership } from "@/lib/supabase/teams";
 import { getCurrentUser } from "@/lib/supabase/auth";
+import { getProfileById } from "@/lib/supabase/profiles";
 import { RosterList } from "@/components/teams/roster-list";
 import { TeamJoinActions } from "@/components/teams/team-join-actions";
+import { MessageButton } from "@/components/messages/message-button";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { MAX_ACTIVE_ROSTER } from "@/lib/teams";
 
@@ -23,13 +25,15 @@ export default async function TeamPage({ params }: { params: Params }) {
   const team = await getTeamById(id);
   if (!team) notFound();
 
-  const [roster, currentUser] = await Promise.all([
+  const [roster, currentUser, owner] = await Promise.all([
     getTeamRoster(id),
     getCurrentUser(),
+    getProfileById(team.owner_id),
   ]);
 
   const membership = currentUser ? await getMembership(id, currentUser.id) : null;
   const activeCount = roster.filter((m) => m.role_on_team !== "sub").length;
+  const showMessageCaptain = currentUser && currentUser.id !== team.owner_id && owner;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -61,12 +65,17 @@ export default async function TeamPage({ params }: { params: Params }) {
                   [{team.tag}]{team.region ? ` · ${team.region}` : ""}
                 </p>
               </div>
-              <TeamJoinActions
-                teamId={team.id}
-                isRecruiting={team.is_recruiting}
-                status={membership?.status ?? null}
-                role={membership?.role_on_team ?? null}
-              />
+              <div className="flex flex-wrap gap-2">
+                {showMessageCaptain ? (
+                  <MessageButton username={owner.username} />
+                ) : null}
+                <TeamJoinActions
+                  teamId={team.id}
+                  isRecruiting={team.is_recruiting}
+                  status={membership?.status ?? null}
+                  role={membership?.role_on_team ?? null}
+                />
+              </div>
             </div>
 
             <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">

@@ -9,6 +9,7 @@ import { getRankById } from "@/lib/ranks";
 import { RankBadge } from "@/components/site/rank-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { FriendButton } from "@/components/profile/friend-button";
+import { MessageButton } from "@/components/messages/message-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -91,12 +92,15 @@ export default async function ProfilePage({ params }: { params: Params }) {
                   Edit Profile
                 </Link>
               ) : currentUser ? (
-                <FriendButton
-                  profileId={profile.id}
-                  profileUsername={profile.username}
-                  currentUserId={currentUser.id}
-                  friendship={friendship}
-                />
+                <div className="flex gap-2">
+                  <MessageButton username={profile.username} />
+                  <FriendButton
+                    profileId={profile.id}
+                    profileUsername={profile.username}
+                    currentUserId={currentUser.id}
+                    friendship={friendship}
+                  />
+                </div>
               ) : null}
             </div>
 

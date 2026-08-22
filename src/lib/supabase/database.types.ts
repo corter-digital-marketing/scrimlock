@@ -4,8 +4,8 @@
  * Only covers tables created so far (Phase 1: `ranks`, `heroes`; Phase 2:
  * `profiles`; Phase 3: `teams`, `team_members`; Phase 5: `scrims`,
  * `scrim_responses`; Phase 6: `tournaments`, `tournament_registrations`;
- * ScrimLock: `friendships`) — extend this as each migration adds tables,
- * or regenerate wholesale once linked.
+ * ScrimLock: `friendships`, `conversations`, `messages`) — extend this as
+ * each migration adds tables, or regenerate wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
 export type TeamMemberStatus = "pending" | "invited" | "active";
@@ -19,6 +19,51 @@ export type FriendshipStatus = "pending" | "accepted";
 export type Database = {
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          id: string;
+          user_a_id: string;
+          user_b_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_a_id: string;
+          user_b_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_a_id?: string;
+          user_b_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          sender_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          sender_id?: string;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       friendships: {
         Row: {
           id: string;
