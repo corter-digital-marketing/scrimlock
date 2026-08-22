@@ -1,4 +1,4 @@
-# Deadlock Esports
+# ScrimLock
 
 A competitive-scene platform for Valve's Deadlock — tournaments, scrims, and
 LFT (looking for team), styled after a 1940s occult-era New York.
@@ -40,23 +40,14 @@ migration — the anon key is public, so access control lives in Postgres
 policies, not just the UI.
 
 Until `.env.local` has real values, the app runs fine but auth is a no-op:
-pages render, but sign up / sign in / Google buttons show a "not connected"
-message instead of crashing.
+pages render, but the Google/Discord buttons show a "not connected" message
+instead of crashing.
 
-### Enabling email sign-up
-
-Works as soon as the three env vars above are set — Supabase's email/password
-auth needs no extra configuration. By default a new Supabase project
-requires the user to click a confirmation link before their first sign-in;
-you'll see that reflected in the signup form's response. (Toggle it off
-under **Authentication → Providers → Email → Confirm email**, if you'd
-rather they land in the app immediately — fine for local testing, not for
-production.)
+Sign-in is **Google and Discord only** — no email/password, so there's no
+password-reset flow to build or run. Each needs an OAuth app registered with
+the provider, since Supabase can't create those on your behalf.
 
 ### Enabling "Continue with Google"
-
-This one needs a Google Cloud OAuth client, since Supabase can't create
-that on your behalf:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
    create (or reuse) a project, then **Create Credentials → OAuth client
@@ -68,14 +59,28 @@ that on your behalf:
 3. Copy the generated **Client ID** and **Client Secret**.
 4. In the Supabase dashboard, go to **Authentication → Providers → Google**,
    enable it, and paste in the Client ID/Secret. Save.
-5. In **Authentication → URL Configuration**, make sure your site URL (and
-   `http://localhost:3000` for local dev) is in the allowed redirect URLs —
-   the app redirects back to `/auth/callback` after Google hands control
-   back to Supabase.
 
-No app code changes needed beyond that — `signInWithGoogleAction` (in
-`src/lib/actions/auth.ts`) and the `/auth/callback` route already handle the
-rest of the flow.
+### Enabling "Continue with Discord"
+
+1. In the [Discord Developer Portal](https://discord.com/developers/applications),
+   create a new application → **OAuth2** tab.
+2. Add a **Redirect**: `https://<your-project-ref>.supabase.co/auth/v1/callback`
+   (same URL shape as Google's, shown again under Supabase's **Authentication
+   → Providers → Discord**).
+3. Copy the **Client ID** and (under **Reset Secret**) the **Client Secret**.
+4. In the Supabase dashboard, go to **Authentication → Providers → Discord**,
+   enable it, and paste in the Client ID/Secret. Save.
+
+### One more step for both
+
+In **Authentication → URL Configuration**, make sure your site URL (and
+`http://localhost:3000` for local dev) is in the allowed redirect URLs — the
+app redirects back to `/auth/callback` after the provider hands control back
+to Supabase.
+
+No app code changes needed beyond that — `signInWithOAuthAction` (in
+`src/lib/actions/auth.ts`) and the `/auth/callback` route already handle
+both providers.
 
 ## Project structure
 
@@ -89,8 +94,9 @@ rest of the flow.
 
 ## Build phases
 
-This is being built incrementally — see the build plan for the full phase
-list. Current status: **Phase 1 — Foundation** done; **Phase 2 — Auth** in
-progress (email/password + Google sign-up and sign-in, auto-created
-profiles, session refresh via `src/proxy.ts`). Profile editing, teams,
-scrims, and tournaments are still ahead.
+Phases 1–6 of the original build plan are done: foundation, auth +
+profiles, teams, LFT, scrims, and tournaments, plus an admin panel for the
+hero roster. Now expanding into the ScrimLock-specific feature set: Google/
+Discord-only auth, richer profiles (social links, friends), team invites,
+on-site messaging, and PUG scrims (party queue, ELO, lobby handoff, result
+voting).

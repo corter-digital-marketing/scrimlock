@@ -74,7 +74,7 @@ export default function Home() {
               <span className="text-brass text-glow-brass">teammates.</span>
             </h1>
             <p className="font-body mt-6 text-lg leading-relaxed text-parchment-dim">
-              Deadlock Esports is where the community organizes tournaments,
+              ScrimLock is where the community organizes tournaments,
               arranges scrims, and finds teammates. One profile, one rank,
               three ways to compete.
             </p>

@@ -11,7 +11,7 @@ export function SiteFooter() {
             <SigilMark className="h-9 w-9 shrink-0 text-brass-dim" />
             <div>
               <p className="font-display text-base tracking-wide text-parchment">
-                DEADLOCK ESPORTS
+                SCRIMLOCK
               </p>
               <p className="font-body mt-1 max-w-sm text-sm text-parchment-dim">
                 An independent community hub for Deadlock competitive play.
@@ -60,7 +60,7 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-2 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">
           <p className="font-body">
-            &copy; {new Date().getFullYear()} Deadlock Esports. Deadlock is a
+            &copy; {new Date().getFullYear()} ScrimLock. Deadlock is a
             trademark of Valve Corporation.
           </p>
           <p className="font-label tracking-widest uppercase">

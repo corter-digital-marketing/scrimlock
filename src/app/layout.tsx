@@ -28,8 +28,8 @@ const ebGaramond = EB_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: "Deadlock Esports — Tournaments, Scrims & LFT",
-    template: "%s — Deadlock Esports",
+    default: "ScrimLock — Tournaments, Scrims & LFT for Deadlock",
+    template: "%s — ScrimLock",
   },
   description:
     "The competitive hub for Valve's Deadlock: run and enter tournaments, arrange scrims, and find your crew.",

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard } from "@/components/auth/auth-card";
-import { LoginForm } from "@/components/auth/login-form";
-import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { OAuthButton } from "@/components/auth/oauth-button";
 
 export const metadata: Metadata = { title: "Sign In" };
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   "google-oauth-failed": "Couldn't start Google sign-in. Please try again.",
+  "discord-oauth-failed": "Couldn't start Discord sign-in. Please try again.",
   "auth-callback-failed": "That sign-in link is invalid or expired.",
   "not-configured":
     "This site isn't connected to a backend yet — add Supabase credentials to .env.local (see README).",
@@ -35,7 +35,7 @@ export default async function LoginPage({
         </>
       }
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
         {errorMessage ? (
           <p
             role="alert"
@@ -45,18 +45,8 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <GoogleAuthButton next={next} />
-
-        <div
-          aria-hidden="true"
-          className="flex items-center gap-3 text-xs tracking-widest text-parchment-dim uppercase"
-        >
-          <span className="h-px flex-1 bg-brass-dim/40" />
-          or
-          <span className="h-px flex-1 bg-brass-dim/40" />
-        </div>
-
-        <LoginForm next={next} />
+        <OAuthButton provider="google" next={next} />
+        <OAuthButton provider="discord" next={next} />
       </div>
     </AuthCard>
   );

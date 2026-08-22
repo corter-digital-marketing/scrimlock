@@ -70,10 +70,10 @@ export function SiteHeader({ user }: { user: CurrentUser | null }) {
           <SigilMark className="h-8 w-8 text-brass" />
           <span className="flex flex-col leading-none">
             <span className="font-display text-lg tracking-[0.08em] text-parchment">
-              DEADLOCK
+              SCRIMLOCK
             </span>
             <span className="font-label text-[10px] tracking-[0.3em] text-verdigris uppercase">
-              Esports
+              for Deadlock
             </span>
           </span>
         </Link>
