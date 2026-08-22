@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { getTeamById, getTeamRoster, getPendingRequests } from "@/lib/supabase/teams";
+import {
+  getTeamById,
+  getTeamRoster,
+  getPendingRequests,
+  getInvitedMembers,
+  getInvitableFriends,
+} from "@/lib/supabase/teams";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { EditTeamForm } from "@/components/teams/manage/edit-team-form";
 import { PendingRequests } from "@/components/teams/manage/pending-requests";
 import { RosterRowControls } from "@/components/teams/manage/roster-row-controls";
+import { InvitedRowControls } from "@/components/teams/manage/invited-row-controls";
+import { InviteFriendForm } from "@/components/teams/manage/invite-friend-form";
 import { DeleteTeamButton } from "@/components/teams/manage/delete-team-button";
 import { RosterList } from "@/components/teams/roster-list";
 import { DecoDivider } from "@/components/site/deco-divider";
@@ -36,9 +44,11 @@ export default async function ManageTeamPage({ params }: { params: Params }) {
     membership?.role_on_team === "owner" || membership?.role_on_team === "captain";
   if (!canManage) redirect(`/teams/${id}`);
 
-  const [roster, pendingRequests] = await Promise.all([
+  const [roster, pendingRequests, invitedMembers, invitableFriends] = await Promise.all([
     getTeamRoster(id),
     getPendingRequests(id),
+    getInvitedMembers(id),
+    getInvitableFriends(id, user.id),
   ]);
 
   return (
@@ -70,6 +80,28 @@ export default async function ManageTeamPage({ params }: { params: Params }) {
         <div className="mt-5">
           <PendingRequests teamId={id} requests={pendingRequests} />
         </div>
+      </div>
+
+      <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
+        <p className="font-label text-xs tracking-widest text-verdigris uppercase">
+          Invite a friend
+        </p>
+        <div className="mt-5">
+          <InviteFriendForm teamId={id} friends={invitableFriends} />
+        </div>
+        {invitedMembers.length > 0 ? (
+          <div className="mt-6">
+            <p className="font-label mb-2 text-xs tracking-widest text-brass-dim uppercase">
+              Invited, awaiting response
+            </p>
+            <RosterList
+              roster={invitedMembers}
+              renderActions={(entry) => (
+                <InvitedRowControls teamId={id} entry={entry} />
+              )}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">

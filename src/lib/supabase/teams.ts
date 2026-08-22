@@ -100,6 +100,87 @@ export async function getPendingRequests(teamId: string): Promise<RosterEntry[]>
   return withProfiles(supabase, data ?? []);
 }
 
+export async function getInvitedMembers(teamId: string): Promise<RosterEntry[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("team_members")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("status", "invited")
+    .order("joined_at", { ascending: true });
+
+  return withProfiles(supabase, data ?? []);
+}
+
+/** Friends of `userId` who aren't already on this team (in any status) —
+ * the candidate list for the invite picker. */
+export async function getInvitableFriends(
+  teamId: string,
+  userId: string,
+): Promise<{ id: string; username: string; display_name: string }[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data: friendRows } = await supabase
+    .from("friendships")
+    .select("requester_id, addressee_id")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+  const friendIds = (friendRows ?? []).map((r) =>
+    r.requester_id === userId ? r.addressee_id : r.requester_id,
+  );
+  if (friendIds.length === 0) return [];
+
+  const { data: existingMembers } = await supabase
+    .from("team_members")
+    .select("user_id")
+    .eq("team_id", teamId)
+    .in("user_id", friendIds);
+
+  const alreadyOnTeam = new Set((existingMembers ?? []).map((m) => m.user_id));
+  const candidateIds = friendIds.filter((id) => !alreadyOnTeam.has(id));
+  if (candidateIds.length === 0) return [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, display_name")
+    .in("id", candidateIds);
+
+  return profiles ?? [];
+}
+
+/** Pending invites the user has received — for a "Team invites" banner. */
+export async function getMyTeamInvites(
+  userId: string,
+): Promise<(TeamMemberRow & { team: TeamRow | null })[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data: invites } = await supabase
+    .from("team_members")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "invited")
+    .order("joined_at", { ascending: false });
+
+  const rows = invites ?? [];
+  if (rows.length === 0) return [];
+
+  const { data: teams } = await supabase
+    .from("teams")
+    .select("*")
+    .in(
+      "id",
+      rows.map((r) => r.team_id),
+    );
+
+  const teamById = new Map((teams ?? []).map((t) => [t.id, t]));
+  return rows.map((r) => ({ ...r, team: teamById.get(r.team_id) ?? null }));
+}
+
 export async function getMembership(
   teamId: string,
   userId: string,

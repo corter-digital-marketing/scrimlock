@@ -8,7 +8,7 @@
  * or regenerate wholesale once linked.
  */
 export type TeamRole = "owner" | "captain" | "player" | "sub";
-export type TeamMemberStatus = "pending" | "active";
+export type TeamMemberStatus = "pending" | "invited" | "active";
 export type ScrimStatus = "open" | "matched" | "cancelled";
 export type ScrimResponseStatus = "pending" | "accepted" | "declined";
 export type TournamentEntryType = "solo" | "team";

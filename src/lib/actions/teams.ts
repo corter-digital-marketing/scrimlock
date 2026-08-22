@@ -402,3 +402,85 @@ export async function deleteTeamAction(formData: FormData) {
   await supabase.from("teams").delete().eq("id", teamId);
   redirect("/teams");
 }
+
+export async function inviteToTeamAction(formData: FormData): Promise<SimpleActionResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
+
+  const teamId = formData.get("teamId");
+  const inviteeId = formData.get("inviteeId");
+  if (typeof teamId !== "string" || typeof inviteeId !== "string") {
+    return { error: "Missing team or friend." };
+  }
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { error: "Not signed in." };
+
+  const role = await getRole(supabase, teamId, user.id);
+  if (!role || (role !== "owner" && role !== "captain")) {
+    return { error: "Only the owner or a captain can invite members." };
+  }
+
+  const activeCount = await countActiveNonSub(supabase, teamId);
+  if (activeCount >= MAX_ACTIVE_ROSTER) {
+    return { error: `Roster is full (${MAX_ACTIVE_ROSTER} max, subs excluded).` };
+  }
+
+  const { error } = await supabase.from("team_members").insert({
+    team_id: teamId,
+    user_id: inviteeId,
+    role_on_team: "player",
+    status: "invited",
+  });
+
+  if (error) {
+    return error.code === "23505"
+      ? { error: "They're already invited or on the team." }
+      : { error: "Couldn't send the invite. Please try again." };
+  }
+
+  revalidatePath(`/teams/${teamId}/manage`);
+}
+
+export async function acceptTeamInviteAction(formData: FormData): Promise<SimpleActionResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
+
+  const teamId = formData.get("teamId");
+  if (typeof teamId !== "string") return { error: "Missing team." };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { error: "Not signed in." };
+
+  const activeCount = await countActiveNonSub(supabase, teamId);
+  if (activeCount >= MAX_ACTIVE_ROSTER) {
+    return { error: `Roster is full (${MAX_ACTIVE_ROSTER} max, subs excluded).` };
+  }
+
+  await supabase
+    .from("team_members")
+    .update({ status: "active" })
+    .eq("team_id", teamId)
+    .eq("user_id", user.id)
+    .eq("status", "invited");
+
+  revalidatePath(`/teams/${teamId}`);
+  revalidatePath("/teams");
+}
+
+export async function declineTeamInviteAction(formData: FormData): Promise<SimpleActionResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
+
+  const teamId = formData.get("teamId");
+  if (typeof teamId !== "string") return { error: "Missing team." };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { error: "Not signed in." };
+
+  await supabase
+    .from("team_members")
+    .delete()
+    .eq("team_id", teamId)
+    .eq("user_id", user.id)
+    .eq("status", "invited");
+
+  revalidatePath("/teams");
+}

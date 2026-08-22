@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { getTeams, getActiveMemberCounts } from "@/lib/supabase/teams";
+import { getTeams, getActiveMemberCounts, getMyTeamInvites } from "@/lib/supabase/teams";
+import { getCurrentUser } from "@/lib/supabase/auth";
 import { TeamCard } from "@/components/teams/team-card";
 import { TeamsFilterBar } from "@/components/teams/teams-filter-bar";
+import { TeamInvitesBanner } from "@/components/teams/team-invites-banner";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Region } from "@/lib/regions";
 
 export const metadata: Metadata = { title: "Teams" };
+export const dynamic = "force-dynamic";
 
 async function TeamsList({
   region,
@@ -48,9 +51,13 @@ export default async function TeamsPage({
   const params = await searchParams;
   const region = params.region as Region | undefined;
   const recruitingOnly = params.recruiting === "1";
+  const currentUser = await getCurrentUser();
+  const invites = currentUser ? await getMyTeamInvites(currentUser.id) : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <TeamInvitesBanner invites={invites} />
+
       <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
         <div>
           <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
