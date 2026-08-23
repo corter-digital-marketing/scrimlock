@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -107,6 +107,15 @@ export async function loginAction(
  * Bound with `.bind(null, provider, next)` from a plain `<form action={...}>`
  * — no client JS required. Computes Supabase's OAuth URL and redirects the
  * browser to the provider's consent screen.
+ *
+ * `next` rides along in a short-lived cookie instead of a `?next=` query
+ * param on the callback URL. Supabase's redirect-URL allow list matched
+ * fine against the exact and wildcard entries in isolation, but a real
+ * end-to-end Google login still bounced to the configured Site URL instead
+ * of the requested redirect — a known class of bug in Supabase's auth
+ * server around redirect URLs carrying a query string (their own issue
+ * tracker has reports of this). Dropping the query string entirely from
+ * the callback URL sidesteps it.
  */
 export async function signInWithOAuthAction(
   provider: OAuthProvider,
@@ -119,10 +128,17 @@ export async function signInWithOAuthAction(
     redirect("/login?error=not-configured");
   }
 
+  const cookieStore = await cookies();
+  cookieStore.set("oauth-next", safeNext(next), {
+    maxAge: 60 * 10,
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+  });
+
   const supabase = await createClient();
   const origin = await getOrigin();
   const callbackUrl = new URL("/auth/callback", origin);
-  callbackUrl.searchParams.set("next", safeNext(next));
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
