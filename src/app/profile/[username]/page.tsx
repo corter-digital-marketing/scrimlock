@@ -16,6 +16,14 @@ import { cn } from "@/lib/utils";
 
 type Params = Promise<{ username: string }>;
 
+// Without this, Next statically caches this route per-username — a
+// request that raced a brand-new profile's creation (or any other
+// timing edge case) gets its notFound() response cached and keeps
+// serving that stale 404 forever, even once the row genuinely exists.
+// Every other dynamic-segment page in the app already opts out; this
+// one was just missed.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

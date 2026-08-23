@@ -22,7 +22,9 @@ const PROTECTED_PATTERNS = [
   /^\/admin(\/|$)/,
   /^\/friends(\/|$)/,
   /^\/messages(\/|$)/,
-  /^\/pug\/[^/]+$/,
+  // Excludes /pug/leaderboard — that's a public page, not a match room,
+  // but it otherwise fits the same "/pug/<one segment>" shape.
+  /^\/pug\/(?!leaderboard$)[^/]+$/,
 ];
 
 /**
