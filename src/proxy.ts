@@ -33,6 +33,22 @@ const PROTECTED_PATTERNS = [
  * per Next's guidance not to rely on proxy as the only line of defense.
  */
 export async function proxy(request: NextRequest) {
+  // Supabase's auth server is landing OAuth callbacks on bare "/" with a
+  // raw `?code=` instead of the `redirect_to` we actually pass it
+  // (`/auth/callback`) — verified this isn't our redirect_to being
+  // rejected (a synthetic probe against the same-origin/auth/v1/callback
+  // endpoint confirms it resolves correctly), so it looks like GoTrue is
+  // preferring the browser's Referer header on the success path, and a
+  // cross-origin nav's Referer is trimmed to just the origin by default
+  // Referrer-Policy. Rather than depend on Supabase's internal
+  // precedence, just catch it here and send it where it was always
+  // supposed to go.
+  if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const callbackUrl = new URL("/auth/callback", request.url);
+    callbackUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(callbackUrl);
+  }
+
   const { supabaseResponse, user } = await updateSession(request);
 
   const isProtected = PROTECTED_PATTERNS.some((pattern) =>
