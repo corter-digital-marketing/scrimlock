@@ -1,48 +1,67 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Swords, Trophy, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import {
   getActiveParty,
   getPartyInvites,
   getInvitableFriendsForParty,
 } from "@/lib/supabase/pug-parties";
-import { getMyActiveMatch, getMyQueueEntry, getQueueCount } from "@/lib/supabase/pug-matches";
+import { getMyActiveMatch, getMyQueueEntry, getQueueCounts } from "@/lib/supabase/pug-matches";
 import { tryFormMatch } from "@/lib/pug-matchmaker";
+import { isPugRegion } from "@/lib/pug-regions";
 import { PartyInvitesBanner } from "@/components/pug/party-invites-banner";
 import { PartyPanel } from "@/components/pug/party-panel";
 import { QueuePanel } from "@/components/pug/queue-panel";
 import { PugAutoRefresh } from "@/components/pug/pug-auto-refresh";
-import { DecoDivider } from "@/components/site/deco-divider";
+import { SigilMark } from "@/components/site/sigil-mark";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Region } from "@/lib/regions";
 
 export const metadata: Metadata = { title: "PUG" };
 export const dynamic = "force-dynamic";
+
+function PugHero({ children }: { children: ReactNode }) {
+  return (
+    <section className="deco-corners relative overflow-hidden border-b border-brass-dim/40 bg-surface">
+      <SigilMark
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 right-[-6rem] h-[28rem] w-[28rem] -translate-y-1/2 text-brass opacity-[0.05]"
+      />
+      <div className="relative mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto flex items-center justify-center gap-3">
+          <Swords className="h-6 w-6 text-verdigris" strokeWidth={1.5} />
+          <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
+            PUG Scrims
+          </p>
+        </div>
+        <h1 className="font-display mt-3 text-4xl text-parchment sm:text-5xl">
+          Find a Match
+        </h1>
+        <p className="font-body mx-auto mt-4 max-w-lg text-parchment-dim">
+          Solo or with a party — 6v6, matched as fast as the queue allows.
+        </p>
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export default async function PugPage() {
   const user = await getCurrentUser();
 
   if (!user) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">
-        <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
-          PUG Scrims
-        </p>
-        <h1 className="font-display mt-3 text-4xl text-parchment">
-          Find a Match
-        </h1>
-        <p className="font-body mt-4 text-parchment-dim">
-          Sign in to queue up — solo or with a party.
-        </p>
+      <PugHero>
         <Link
           href="/login?next=/pug"
-          className={cn(buttonVariants(), "bg-brass text-primary-foreground hover:bg-brass/90 mt-6")}
+          className={cn(buttonVariants({ size: "lg" }), "bg-brass text-primary-foreground hover:bg-brass/90 mt-8 shadow-[0_0_0_1px_var(--brass-dim)]")}
         >
           Sign In
         </Link>
-      </div>
+      </PugHero>
     );
   }
 
@@ -57,9 +76,10 @@ export default async function PugPage() {
     myQueueEntry = await getMyQueueEntry(user.id);
   }
 
-  const [activeParty, partyInvites] = await Promise.all([
+  const [activeParty, partyInvites, queueCounts] = await Promise.all([
     getActiveParty(user.id),
     getPartyInvites(user.id),
+    getQueueCounts(),
   ]);
 
   const invitableFriends =
@@ -67,51 +87,63 @@ export default async function PugPage() {
       ? await getInvitableFriendsForParty(activeParty.party.id, user.id)
       : [];
 
-  const region = (myQueueEntry?.region ?? activeParty?.party.region) as Region | undefined;
-  const queueCount = region ? await getQueueCount(region) : 0;
+  const rawRegion = myQueueEntry?.region ?? activeParty?.party.region;
+  const defaultRegion = isPugRegion(rawRegion) ? rawRegion : undefined;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+    <div>
       <PugAutoRefresh />
 
-      <div className="text-center">
-        <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
-          PUG Scrims
-        </p>
-        <h1 className="font-display mt-3 text-4xl text-parchment">
-          Find a Match
-        </h1>
-        <p className="font-body mx-auto mt-4 max-w-lg text-parchment-dim">
-          Solo or with a party — 6v6, matched as fast as the queue allows.
-        </p>
-      </div>
+      <PugHero>
+        <Link
+          href="/pug/leaderboard"
+          className="font-label text-brass-dim hover:text-brass mt-6 inline-flex items-center gap-1.5 text-xs tracking-widest uppercase transition-colors"
+        >
+          <Trophy className="h-3.5 w-3.5" />
+          Leaderboard
+        </Link>
+      </PugHero>
 
-      <DecoDivider className="mt-8" />
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+        <PartyInvitesBanner invites={partyInvites} />
 
-      <PartyInvitesBanner invites={partyInvites} />
+        <div className="frame-brass rounded-sm bg-surface px-6 py-8 sm:px-10">
+          <div className="flex items-center justify-center gap-2">
+            <Swords className="h-4 w-4 text-brass-dim" strokeWidth={1.5} />
+            <p className="font-label text-xs tracking-widest text-brass-dim uppercase">
+              Queue
+            </p>
+          </div>
+          <div className="mt-5">
+            <QueuePanel
+              myQueueEntry={myQueueEntry}
+              activeParty={activeParty}
+              currentUserId={user.id}
+              queueCounts={queueCounts}
+              defaultRegion={defaultRegion}
+            />
+          </div>
+        </div>
 
-      <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
-        <p className="font-label mb-4 text-xs tracking-widest text-brass-dim uppercase">
-          Queue
-        </p>
-        <QueuePanel
-          myQueueEntry={myQueueEntry}
-          activeParty={activeParty}
-          currentUserId={user.id}
-          queueCount={queueCount}
-          defaultRegion={region}
-        />
-      </div>
+        <div className="mt-8 flex items-center justify-center gap-3 text-brass-dim">
+          <span className="h-px flex-1 bg-current opacity-40" />
+          <Users className="h-4 w-4" strokeWidth={1.5} />
+          <span className="h-px flex-1 bg-current opacity-40" />
+        </div>
 
-      <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
-        <p className="font-label mb-4 text-xs tracking-widest text-brass-dim uppercase">
-          Party
-        </p>
-        <PartyPanel
-          activeParty={activeParty}
-          currentUserId={user.id}
-          invitableFriends={invitableFriends}
-        />
+        <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
+          <p className="font-label mb-1 text-center text-xs tracking-widest text-brass-dim uppercase">
+            Party
+          </p>
+          <div className="mt-5">
+            <PartyPanel
+              activeParty={activeParty}
+              currentUserId={user.id}
+              invitableFriends={invitableFriends}
+              defaultRegion={defaultRegion}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

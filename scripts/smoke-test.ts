@@ -659,25 +659,54 @@ async function main() {
   }
 }
 
+/**
+ * A first live run of this left 12 test users stranded — cleanup logged
+ * "Deleted 12 test users" but the delete order was wrong:
+ * pug_queue_entries.matched_into references pug_matches with no
+ * cascade, so deleting pug_matches first (while the consumed queue
+ * entries still point at it via matched_into) fails the whole
+ * statement — and deleteUser doesn't throw on the resulting FK error,
+ * it just returns an unchecked `error`, so cleanup claimed success
+ * anyway. Queue entries have to go first. Check every delete's error
+ * here and print it instead of assuming success either way.
+ */
+async function deleteTable(table: string, ids: string[]) {
+  if (!ids.length) return;
+  const { error } = await admin.from(table).delete().in("id", ids);
+  if (error) console.warn(`  cleanup: failed to delete from ${table}: ${error.message}`);
+}
+
 async function cleanup() {
   console.log("\n=== Cleanup ===");
-  if (matchIds.length) await admin.from("pug_matches").delete().in("id", matchIds);
-  if (queueEntryIds.length) await admin.from("pug_queue_entries").delete().in("id", queueEntryIds);
-  if (partyIds.length) await admin.from("pug_parties").delete().in("id", partyIds);
-  if (conversationIds.length) await admin.from("conversations").delete().in("id", conversationIds);
-  if (friendshipIds.length) await admin.from("friendships").delete().in("id", friendshipIds);
-  if (scrimIds.length) await admin.from("scrims").delete().in("id", scrimIds);
-  if (tournamentIds.length) await admin.from("tournaments").delete().in("id", tournamentIds);
-  if (teamIds.length) await admin.from("teams").delete().in("id", teamIds);
+  await deleteTable("pug_queue_entries", queueEntryIds);
+  await deleteTable("pug_matches", matchIds);
+  await deleteTable("pug_parties", partyIds);
+  await deleteTable("conversations", conversationIds);
+  await deleteTable("friendships", friendshipIds);
+  await deleteTable("scrims", scrimIds);
+  await deleteTable("tournaments", tournamentIds);
+  await deleteTable("teams", teamIds);
 
   const { data: usersToDelete } = await admin
     .from("profiles")
-    .select("id")
+    .select("id, username")
     .like("username", `smoke${RUN_ID}%`);
+
+  let deleted = 0;
   for (const u of usersToDelete ?? []) {
-    await admin.auth.admin.deleteUser(u.id);
+    const { error } = await admin.auth.admin.deleteUser(u.id);
+    if (error) {
+      console.warn(`  cleanup: failed to delete user ${u.username}: ${error.message}`);
+    } else {
+      deleted++;
+    }
   }
-  console.log(`Deleted ${usersToDelete?.length ?? 0} test users and all associated rows.`);
+  console.log(`Deleted ${deleted}/${usersToDelete?.length ?? 0} test users and their rows.`);
+  if (deleted !== (usersToDelete?.length ?? 0)) {
+    console.warn(
+      "  Some test users are still in the project — check the warnings above and remove them manually.",
+    );
+  }
 }
 
 main()

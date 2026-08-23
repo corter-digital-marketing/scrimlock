@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Radio } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getMatchById, getMatchPlayers, getMatchVotes } from "@/lib/supabase/pug-matches";
 import { MatchRoster } from "@/components/pug/match-roster";
+import { MatchStatusStepper } from "@/components/pug/match-status-stepper";
 import { LobbyCodeForm } from "@/components/pug/lobby-code-form";
+import { LobbyCodeDisplay } from "@/components/pug/lobby-code-display";
 import { VotePanel } from "@/components/pug/vote-panel";
 import { PugAutoRefresh } from "@/components/pug/pug-auto-refresh";
 import { DecoDivider } from "@/components/site/deco-divider";
@@ -16,12 +19,6 @@ type Params = Promise<{ matchId: string }>;
 
 export const metadata: Metadata = { title: "PUG Match" };
 export const dynamic = "force-dynamic";
-
-const STATUS_LABEL: Record<string, string> = {
-  lobby_pending: "Waiting on lobby code",
-  in_progress: "In progress",
-  completed: "Completed",
-};
 
 function MatchUnavailable() {
   return (
@@ -72,65 +69,68 @@ export default async function PugMatchPage({ params }: { params: Params }) {
       {match.status !== "completed" ? <PugAutoRefresh /> : null}
 
       <div className="text-center">
-        <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
-          {match.region}
-        </p>
+        <div className="inline-flex items-center gap-2">
+          {match.status !== "completed" ? (
+            <Radio className="h-3.5 w-3.5 animate-pulse text-verdigris" />
+          ) : null}
+          <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
+            {match.region} Region
+          </p>
+        </div>
         <h1 className="font-display mt-3 text-4xl text-parchment">
-          PUG Match
+          <span className="text-brass">Team 1</span>{" "}
+          <span className="text-parchment-dim">vs</span>{" "}
+          <span className="text-verdigris">Team 2</span>
         </h1>
-        <p
-          className={cn(
-            "font-label mt-2 text-xs tracking-widest uppercase",
-            match.status === "completed" ? "text-brass" : "text-parchment-dim",
-          )}
-        >
-          {STATUS_LABEL[match.status]}
-        </p>
+      </div>
+
+      <div className="mt-8">
+        <MatchStatusStepper status={match.status} />
       </div>
 
       <DecoDivider className="mt-8" />
 
       <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
-        <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
+        <p className="font-label mb-3 text-center text-xs tracking-widest text-brass-dim uppercase">
           Lobby
         </p>
         {match.lobby_code ? (
-          <p className="font-body text-parchment">
-            Join code: <span className="text-brass select-all">{match.lobby_code}</span>
-          </p>
+          <LobbyCodeDisplay code={match.lobby_code} />
         ) : isLobbyMaker ? (
           <div>
-            <p className="font-body mb-3 text-sm text-parchment-dim">
+            <p className="font-body mb-3 text-center text-sm text-parchment-dim">
               You&apos;re the lobby maker — create the custom lobby in Deadlock
               and paste the join code here for everyone.
             </p>
             <LobbyCodeForm matchId={match.id} />
           </div>
         ) : (
-          <p className="font-body text-sm text-parchment-dim">
+          <p className="font-body text-center text-sm text-parchment-dim">
             Waiting on the lobby maker to post the join code…
           </p>
         )}
       </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        <div className="frame-brass rounded-sm bg-surface px-6 py-6">
-          <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
+        <div className="frame-brass rounded-sm bg-surface px-6 py-6 shadow-[0_0_24px_-8px_color-mix(in_oklab,var(--brass)_35%,transparent)]">
+          <p className="font-label mb-3 text-xs tracking-widest text-brass uppercase">
             Team 1
           </p>
           <MatchRoster
             players={team1}
             lobbyMakerId={match.lobby_maker_id}
+            team={1}
             won={match.winning_team === 1}
           />
         </div>
-        <div className="frame-brass rounded-sm bg-surface px-6 py-6">
-          <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
+        <div className="frame-brass rounded-sm bg-surface px-6 py-6 shadow-[0_0_24px_-8px_color-mix(in_oklab,var(--verdigris)_35%,transparent)]">
+          <p className="font-label mb-3 text-xs tracking-widest text-verdigris uppercase">
             Team 2
           </p>
           <MatchRoster
             players={team2}
             lobbyMakerId={match.lobby_maker_id}
+            team={2}
             won={match.winning_team === 2}
           />
         </div>
@@ -139,7 +139,10 @@ export default async function PugMatchPage({ params }: { params: Params }) {
       <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
         {match.status === "completed" ? (
           <p className="font-body text-center text-parchment">
-            Team {match.winning_team} won. ELO has been applied.
+            <span className={match.winning_team === 1 ? "text-brass" : "text-verdigris"}>
+              Team {match.winning_team}
+            </span>{" "}
+            won. ELO has been applied.
           </p>
         ) : !match.lobby_code ? (
           <p className="font-body text-center text-sm text-parchment-dim">

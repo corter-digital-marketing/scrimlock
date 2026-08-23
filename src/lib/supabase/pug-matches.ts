@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Database } from "@/lib/supabase/database.types";
+import { PUG_REGIONS, type PugRegion } from "@/lib/pug-regions";
 
 export type PugMatchRow = Database["public"]["Tables"]["pug_matches"]["Row"];
 export type PugMatchPlayerRow = Database["public"]["Tables"]["pug_match_players"]["Row"];
@@ -101,4 +102,24 @@ export async function getQueueCount(region: string): Promise<number> {
     .eq("status", "queued");
 
   return (data ?? []).reduce((sum, r) => sum + r.size, 0);
+}
+
+/** Live head count for every PUG region at once — lets the queue screen
+ * show both pools up front so players can pick whichever's warmer. */
+export async function getQueueCounts(): Promise<Record<PugRegion, number>> {
+  const empty = Object.fromEntries(PUG_REGIONS.map((r) => [r, 0])) as Record<PugRegion, number>;
+  if (!isSupabaseConfigured()) return empty;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pug_queue_entries")
+    .select("region, size")
+    .in("region", PUG_REGIONS)
+    .eq("status", "queued");
+
+  const counts = { ...empty };
+  for (const row of data ?? []) {
+    if (row.region === "NA" || row.region === "EU") counts[row.region] += row.size;
+  }
+  return counts;
 }

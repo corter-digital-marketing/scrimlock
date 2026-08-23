@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { isPugRegion } from "@/lib/pug-regions";
 
 export type SimpleActionResult = { error?: string } | void;
 
@@ -35,7 +36,7 @@ export async function createPartyAction(formData: FormData): Promise<SimpleActio
   if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
 
   const region = formData.get("region");
-  if (typeof region !== "string" || !region) return { error: "Pick a region." };
+  if (!isPugRegion(region)) return { error: "Pick a region." };
 
   const { supabase, user } = await requireUser();
   if (!user) return { error: "Not signed in." };
