@@ -82,7 +82,12 @@ export async function getMatchMessages(matchId: string): Promise<MatchMessageEnt
   return rows.map((r) => ({ ...r, profile: byId.get(r.sender_id) ?? null }));
 }
 
-/** An unresolved match (not yet completed) the user is currently part of. */
+/** An unresolved match (not yet completed *or* cancelled) the user is
+ * currently part of — /pug redirects here so someone can't queue into a
+ * second match while still in one. A cancelled match doesn't count:
+ * this was missed when 'cancelled' was added as a status, and it sent
+ * anyone whose match got cancelled straight back to it every time they
+ * tried to leave, with no way back to the queue screen. */
 export async function getMyActiveMatch(userId: string): Promise<PugMatchRow | null> {
   if (!isSupabaseConfigured()) return null;
 
@@ -99,7 +104,7 @@ export async function getMyActiveMatch(userId: string): Promise<PugMatchRow | nu
     .from("pug_matches")
     .select("*")
     .in("id", matchIds)
-    .neq("status", "completed")
+    .in("status", ["lobby_pending", "in_progress"])
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

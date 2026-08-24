@@ -115,9 +115,20 @@ export default async function PugMatchPage({ params }: { params: Params }) {
             Lobby
           </p>
           {match.status === "cancelled" ? (
-            <p className="font-body text-center text-sm text-parchment-dim">
-              This match was cancelled — head back to PUG to queue again.
-            </p>
+            <div className="flex flex-col items-center gap-4">
+              <p className="font-body text-center text-sm text-parchment-dim">
+                This match was cancelled — not everyone checked in in time.
+              </p>
+              <Link
+                href="/pug"
+                className={cn(
+                  buttonVariants(),
+                  "bg-brass text-primary-foreground hover:bg-brass/90",
+                )}
+              >
+                Back to PUG
+              </Link>
+            </div>
           ) : match.lobby_code ? (
             <LobbyCodeDisplay code={match.lobby_code} />
           ) : isLobbyMaker ? (

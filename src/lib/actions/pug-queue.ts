@@ -20,6 +20,9 @@ async function requireUser() {
   return { supabase, user };
 }
 
+/** Same "active means lobby_pending or in_progress" definition as
+ * getMyActiveMatch — a cancelled match must not count, or it permanently
+ * blocks re-queueing (same bug, same fix, two call sites). */
 async function isInActiveMatch(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userIds: string[],
@@ -36,7 +39,7 @@ async function isInActiveMatch(
     .from("pug_matches")
     .select("id")
     .in("id", matchIds)
-    .neq("status", "completed")
+    .in("status", ["lobby_pending", "in_progress"])
     .limit(1);
 
   return (unresolved?.length ?? 0) > 0;
