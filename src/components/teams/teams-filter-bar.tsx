@@ -42,7 +42,11 @@ export function TeamsFilterBar() {
         <Label className="font-label text-xs tracking-widest text-brass-dim uppercase">
           Region
         </Label>
-        <Select value={region} onValueChange={(v) => update({ region: v as string })}>
+        <Select
+          value={region}
+          items={{ all: "All regions", ...Object.fromEntries(REGIONS.map((r) => [r, r])) }}
+          onValueChange={(v) => update({ region: v as string })}
+        >
           <SelectTrigger className="w-40 border-brass-dim/60 bg-surface-2">
             <SelectValue />
           </SelectTrigger>

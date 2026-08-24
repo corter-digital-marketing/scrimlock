@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useRef, useState } from "react";
 import { updateProfileAction, type ProfileActionState } from "@/lib/actions/profile";
-import { RANKS, subrankToRoman } from "@/lib/ranks";
+import { RANKS, subrankToRoman, rankSelectItems, subrankSelectItems } from "@/lib/ranks";
 import { REGIONS } from "@/lib/regions";
 import type { ProfileRow } from "@/lib/supabase/profiles";
 import type { HeroOption } from "@/lib/supabase/heroes";
@@ -241,7 +241,7 @@ export function ProfileSettingsForm({
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label className={fieldLabelClass()}>Region</Label>
-            <Select name="region" defaultValue={profile.region ?? "none"}>
+            <Select name="region" defaultValue={profile.region ?? "none"} items={{ none: "Not set" }}>
               <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
                 <SelectValue placeholder="Not set" />
               </SelectTrigger>
@@ -289,6 +289,7 @@ export function ProfileSettingsForm({
             <Select
               name="rankId"
               value={rankId}
+              items={rankSelectItems({ value: "none", label: "Not set" })}
               onValueChange={(v) => {
                 setRankId(v as string);
                 if (v === "none" || v === "0") setRankSubrank("none");
@@ -313,6 +314,7 @@ export function ProfileSettingsForm({
             <Select
               name="rankSubrank"
               value={rankSubrank}
+              items={subrankSelectItems({ value: "none", label: "Not set" })}
               onValueChange={(v) => setRankSubrank(v as string)}
               disabled={!showSubrank}
             >

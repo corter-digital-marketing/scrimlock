@@ -43,7 +43,14 @@ export function RespondForm({
           <Label className="font-label text-xs tracking-widest text-brass-dim uppercase">
             Respond as
           </Label>
-          <Select name="teamId" defaultValue="none">
+          <Select
+            name="teamId"
+            defaultValue="none"
+            items={{
+              none: "Just you",
+              ...Object.fromEntries(teams.map((team) => [team.id, `${team.name} [${team.tag}]`])),
+            }}
+          >
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>

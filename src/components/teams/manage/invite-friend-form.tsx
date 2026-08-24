@@ -44,7 +44,11 @@ export function InviteFriendForm({
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Select value={selected} onValueChange={(v) => setSelected(v ?? "")}>
+      <Select
+        value={selected}
+        items={Object.fromEntries(friends.map((f) => [f.id, f.display_name]))}
+        onValueChange={(v) => setSelected(v ?? "")}
+      >
         <SelectTrigger className="w-56 border-brass-dim/60 bg-surface-2">
           <SelectValue placeholder="Choose a friend" />
         </SelectTrigger>

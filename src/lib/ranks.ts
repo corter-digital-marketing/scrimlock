@@ -37,3 +37,27 @@ export function subrankToRoman(subrank: number | null | undefined) {
 export function getRankById(id: number | null | undefined) {
   return RANKS.find((r) => r.id === id) ?? null;
 }
+
+/**
+ * value -> label maps for Base UI's `<Select items={...}>` prop. Unlike
+ * Radix, Base UI's Select.Value doesn't scan the rendered <Select.Item>
+ * children to figure out what to display — without an `items` map (or a
+ * render-prop child) it just shows the raw selected value, which is why
+ * every rank picker in the app was displaying "3" instead of "Acolyte"
+ * (and subrank pickers "2" instead of "II"). One sentinel entry
+ * (e.g. { value: "any", label: "Any" }) can be passed in per picker
+ * since each one uses a different placeholder value ("any", "none", ...).
+ */
+export function rankSelectItems(sentinel?: { value: string; label: string }): Record<string, string> {
+  const items: Record<string, string> = {};
+  if (sentinel) items[sentinel.value] = sentinel.label;
+  for (const r of RANKS) items[String(r.id)] = r.name;
+  return items;
+}
+
+export function subrankSelectItems(sentinel?: { value: string; label: string }): Record<string, string> {
+  const items: Record<string, string> = {};
+  if (sentinel) items[sentinel.value] = sentinel.label;
+  for (let n = 1; n <= 6; n++) items[String(n)] = ROMAN_NUMERALS[n - 1];
+  return items;
+}

@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import type { TournamentActionState } from "@/lib/actions/tournaments";
 import { REGIONS } from "@/lib/regions";
-import { RANKS } from "@/lib/ranks";
+import { RANKS, rankSelectItems } from "@/lib/ranks";
 import type { TournamentRow } from "@/lib/supabase/tournaments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,7 +159,11 @@ export function TournamentForm({
 
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Entry type</Label>
-          <Select name="entryType" defaultValue={tournament?.entry_type ?? "solo"}>
+          <Select
+            name="entryType"
+            defaultValue={tournament?.entry_type ?? "solo"}
+            items={{ solo: "Solo", team: "Team" }}
+          >
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>
@@ -194,7 +198,11 @@ export function TournamentForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Min rank (optional gate)</Label>
-          <Select name="minRankId" defaultValue={tournament?.min_rank_id != null ? String(tournament.min_rank_id) : "any"}>
+          <Select
+            name="minRankId"
+            defaultValue={tournament?.min_rank_id != null ? String(tournament.min_rank_id) : "any"}
+            items={rankSelectItems({ value: "any", label: "Any" })}
+          >
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>
@@ -211,7 +219,11 @@ export function TournamentForm({
 
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Max rank (optional gate)</Label>
-          <Select name="maxRankId" defaultValue={tournament?.max_rank_id != null ? String(tournament.max_rank_id) : "any"}>
+          <Select
+            name="maxRankId"
+            defaultValue={tournament?.max_rank_id != null ? String(tournament.max_rank_id) : "any"}
+            items={rankSelectItems({ value: "any", label: "Any" })}
+          >
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>

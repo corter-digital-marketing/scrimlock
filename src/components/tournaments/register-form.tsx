@@ -55,7 +55,11 @@ export function RegisterForm({
             <Label className="font-label text-xs tracking-widest text-brass-dim uppercase">
               Register as
             </Label>
-            <Select name="teamId" required>
+            <Select
+              name="teamId"
+              required
+              items={Object.fromEntries(teams.map((team) => [team.id, `${team.name} [${team.tag}]`]))}
+            >
               <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
                 <SelectValue placeholder="Choose a team" />
               </SelectTrigger>

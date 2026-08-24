@@ -41,7 +41,12 @@ export function StatusControl({
   }
 
   return (
-    <Select value={status} onValueChange={change} disabled={pending}>
+    <Select
+      value={status}
+      items={Object.fromEntries(STATUSES.map((s) => [s.value, s.label]))}
+      onValueChange={change}
+      disabled={pending}
+    >
       <SelectTrigger className="w-56 border-brass-dim/60 bg-surface-2">
         <SelectValue />
       </SelectTrigger>

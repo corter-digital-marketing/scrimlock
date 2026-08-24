@@ -117,7 +117,11 @@ export function PartyPanel({
 
       {isLeader && invitableFriends.length > 0 ? (
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Select value={selectedFriend} onValueChange={(v) => setSelectedFriend(v ?? "")}>
+          <Select
+            value={selectedFriend}
+            items={Object.fromEntries(invitableFriends.map((f) => [f.id, f.display_name]))}
+            onValueChange={(v) => setSelectedFriend(v ?? "")}
+          >
             <SelectTrigger className="w-48 border-brass-dim/60 bg-surface-2">
               <SelectValue placeholder="Invite a friend" />
             </SelectTrigger>

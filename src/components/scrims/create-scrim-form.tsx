@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { createScrimAction, type ScrimActionState } from "@/lib/actions/scrims";
 import { REGIONS } from "@/lib/regions";
-import { RANKS } from "@/lib/ranks";
+import { RANKS, rankSelectItems } from "@/lib/ranks";
 import type { TeamRow } from "@/lib/supabase/teams";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,14 @@ export function CreateScrimForm({ teams }: { teams: TeamRow[] }) {
       {teams.length > 0 ? (
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Post as</Label>
-          <Select name="teamId" defaultValue="none">
+          <Select
+            name="teamId"
+            defaultValue="none"
+            items={{
+              none: "Solo (just you)",
+              ...Object.fromEntries(teams.map((team) => [team.id, `${team.name} [${team.tag}]`])),
+            }}
+          >
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>
@@ -76,7 +83,7 @@ export function CreateScrimForm({ teams }: { teams: TeamRow[] }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Min opponent rank</Label>
-          <Select name="minRankId" defaultValue="any">
+          <Select name="minRankId" defaultValue="any" items={rankSelectItems({ value: "any", label: "Any" })}>
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>
@@ -93,7 +100,7 @@ export function CreateScrimForm({ teams }: { teams: TeamRow[] }) {
 
         <div className="flex flex-col gap-1.5">
           <Label className={fieldLabelClass()}>Max opponent rank</Label>
-          <Select name="maxRankId" defaultValue="any">
+          <Select name="maxRankId" defaultValue="any" items={rankSelectItems({ value: "any", label: "Any" })}>
             <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
               <SelectValue />
             </SelectTrigger>
