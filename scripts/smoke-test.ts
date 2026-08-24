@@ -328,7 +328,7 @@ async function main() {
         title: "Smoke Test Open",
         organizer_id: u0.id,
         description: "smoke test",
-        region: "NA East",
+        region: "NA",
         entry_type: "solo",
         max_participants: 8,
         starts_at: startsAt,
@@ -342,22 +342,31 @@ async function main() {
 
     const { error: openErr } = await u0.client
       .from("tournaments")
-      .update({ status: "open" })
+      .update({ status: "open", signup_url: "https://discord.gg/smoke-test" })
       .eq("id", tournament!.id);
-    assert("organizer opens registration", !openErr, openErr?.message);
+    assert("organizer opens it and sets a signup link", !openErr, openErr?.message);
 
-    const { data: reg, error: regErr } = await u1.client
-      .from("tournament_registrations")
-      .insert({ tournament_id: tournament!.id, user_id: u1.id })
-      .select("id")
+    const { data: signupCheck } = await admin
+      .from("tournaments")
+      .select("signup_url")
+      .eq("id", tournament!.id)
       .single();
-    assert("player registers (solo entry)", !regErr && !!reg, regErr?.message);
+    assert("signup_url actually saved", signupCheck?.signup_url === "https://discord.gg/smoke-test");
 
-    const { error: confirmErr } = await u0.client
-      .from("tournament_registrations")
-      .update({ status: "confirmed" })
-      .eq("id", reg!.id);
-    assert("organizer confirms the registration", !confirmErr, confirmErr?.message);
+    const { error: outsiderSignupErr } = await u5.client
+      .from("tournaments")
+      .update({ signup_url: "https://evil.example/hijacked" })
+      .eq("id", tournament!.id);
+    const { data: signupCheck2 } = await admin
+      .from("tournaments")
+      .select("signup_url")
+      .eq("id", tournament!.id)
+      .single();
+    assert(
+      "RLS blocks a non-organizer from changing the signup link",
+      signupCheck2?.signup_url === "https://discord.gg/smoke-test",
+      outsiderSignupErr?.message,
+    );
 
     const { error: outsiderErr } = await u5.client
       .from("tournaments")

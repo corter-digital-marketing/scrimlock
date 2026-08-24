@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Users } from "lucide-react";
+import { Loader2, Plus, UserPlus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   createPartyAction,
@@ -44,6 +44,7 @@ export function PartyPanel({
   const [pending, startTransition] = useTransition();
   const [region, setRegion] = useState<PugRegion | "">(defaultRegion ?? "");
   const [selectedFriend, setSelectedFriend] = useState<string>("");
+  const [showInvite, setShowInvite] = useState(false);
 
   function act(action: (fd: FormData) => Promise<SimpleActionResult>, fields: Record<string, string>) {
     startTransition(async () => {
@@ -113,39 +114,71 @@ export function PartyPanel({
             </li>
           );
         })}
+
+        {isLeader && activeParty.members.length < 6 ? (
+          <li className="flex flex-col items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="Invite a friend"
+              title="Invite a friend"
+              onClick={() => setShowInvite((v) => !v)}
+              className={cn(
+                "transition-weighted flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed",
+                showInvite
+                  ? "border-brass bg-brass/10 text-brass"
+                  : "border-brass-dim/40 text-brass-dim hover:border-brass hover:text-brass",
+              )}
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+            <span className="font-label max-w-16 truncate text-[10px] tracking-widest text-parchment-dim uppercase">
+              Invite
+            </span>
+          </li>
+        ) : null}
       </ul>
 
-      {isLeader && invitableFriends.length > 0 ? (
+      {showInvite ? (
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Select
-            value={selectedFriend}
-            items={Object.fromEntries(invitableFriends.map((f) => [f.id, f.display_name]))}
-            onValueChange={(v) => setSelectedFriend(v ?? "")}
-          >
-            <SelectTrigger className="w-48 border-brass-dim/60 bg-surface-2">
-              <SelectValue placeholder="Invite a friend" />
-            </SelectTrigger>
-            <SelectContent>
-              {invitableFriends.map((friend) => (
-                <SelectItem key={friend.id} value={friend.id}>
-                  {friend.display_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending || !selectedFriend}
-            className="border-brass-dim gap-1.5"
-            onClick={() => {
-              act(inviteToPartyAction, { partyId: activeParty.party.id, inviteeId: selectedFriend });
-              setSelectedFriend("");
-            }}
-          >
-            <UserPlus className="h-4 w-4" />
-            Invite
-          </Button>
+          {invitableFriends.length > 0 ? (
+            <>
+              <Select
+                value={selectedFriend}
+                items={Object.fromEntries(invitableFriends.map((f) => [f.id, f.display_name]))}
+                onValueChange={(v) => setSelectedFriend(v ?? "")}
+              >
+                <SelectTrigger className="w-48 border-brass-dim/60 bg-surface-2">
+                  <SelectValue placeholder="Invite a friend" />
+                </SelectTrigger>
+                <SelectContent>
+                  {invitableFriends.map((friend) => (
+                    <SelectItem key={friend.id} value={friend.id}>
+                      {friend.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending || !selectedFriend}
+                className="border-brass-dim gap-1.5"
+                onClick={() => {
+                  act(inviteToPartyAction, { partyId: activeParty.party.id, inviteeId: selectedFriend });
+                  setSelectedFriend("");
+                  setShowInvite(false);
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+                Invite
+              </Button>
+            </>
+          ) : (
+            <p className="font-body text-parchment-dim text-xs">
+              No friends left to invite — everyone&apos;s already in, invited, or you have no
+              friends added yet.
+            </p>
+          )}
         </div>
       ) : null}
 

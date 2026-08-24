@@ -28,6 +28,10 @@ export const createTournamentSchema = z
     registrationClosesAt: z
       .string()
       .refine((v) => !Number.isNaN(Date.parse(v)), "Pick a valid date and time"),
+    // Signups happen off-site (Discord, a form, etc.) — this is where
+    // "Sign Up" sends people. Optional so a draft can be saved before
+    // that link exists yet.
+    signupUrl: z.string().trim().max(300, "300 characters max").url("Enter a valid URL").optional(),
     banner: bannerSchema,
   })
   .refine(

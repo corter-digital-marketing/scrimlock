@@ -15,7 +15,6 @@ export type ScrimStatus = "open" | "matched" | "cancelled";
 export type ScrimResponseStatus = "pending" | "accepted" | "declined";
 export type TournamentEntryType = "solo" | "team";
 export type TournamentStatus = "draft" | "open" | "closed" | "in_progress" | "completed";
-export type RegistrationStatus = "pending" | "confirmed" | "withdrawn";
 export type FriendshipStatus = "pending" | "accepted";
 export type PugPartyMemberStatus = "invited" | "active";
 export type PugMatchStatus = "lobby_pending" | "in_progress" | "completed" | "cancelled";
@@ -335,6 +334,7 @@ export type Database = {
           registration_closes_at: string;
           status: TournamentStatus;
           banner_url: string | null;
+          signup_url: string | null;
           created_at: string;
         };
         Insert: {
@@ -353,6 +353,7 @@ export type Database = {
           registration_closes_at: string;
           status?: TournamentStatus;
           banner_url?: string | null;
+          signup_url?: string | null;
           created_at?: string;
         };
         Update: {
@@ -371,34 +372,8 @@ export type Database = {
           registration_closes_at?: string;
           status?: TournamentStatus;
           banner_url?: string | null;
+          signup_url?: string | null;
           created_at?: string;
-        };
-        Relationships: [];
-      };
-      tournament_registrations: {
-        Row: {
-          id: string;
-          tournament_id: string;
-          user_id: string | null;
-          team_id: string | null;
-          status: RegistrationStatus;
-          registered_at: string;
-        };
-        Insert: {
-          id?: string;
-          tournament_id: string;
-          user_id?: string | null;
-          team_id?: string | null;
-          status?: RegistrationStatus;
-          registered_at?: string;
-        };
-        Update: {
-          id?: string;
-          tournament_id?: string;
-          user_id?: string | null;
-          team_id?: string | null;
-          status?: RegistrationStatus;
-          registered_at?: string;
         };
         Relationships: [];
       };

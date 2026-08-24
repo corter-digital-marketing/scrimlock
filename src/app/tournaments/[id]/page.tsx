@@ -2,20 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import {
-  getTournamentById,
-  getRegistrations,
-  getMyRegistrations,
-} from "@/lib/supabase/tournaments";
-import { getManagedTeams } from "@/lib/supabase/teams";
+import { ExternalLink } from "lucide-react";
+import { getTournamentById } from "@/lib/supabase/tournaments";
 import { getProfileById } from "@/lib/supabase/profiles";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getRankById } from "@/lib/ranks";
 import { LocalDateTime } from "@/components/site/local-datetime";
 import { DecoDivider } from "@/components/site/deco-divider";
-import { RegisterForm } from "@/components/tournaments/register-form";
-import { WithdrawButton } from "@/components/tournaments/withdraw-button";
-import { ParticipantList } from "@/components/tournaments/participant-list";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -42,38 +35,14 @@ export default async function TournamentPage({ params }: { params: Params }) {
   const tournament = await getTournamentById(id);
   if (!tournament) notFound();
 
-  const [organizer, registrations, currentUser] = await Promise.all([
+  const [organizer, currentUser] = await Promise.all([
     getProfileById(tournament.organizer_id),
-    getRegistrations(id),
     getCurrentUser(),
   ]);
 
   const isOrganizer = currentUser?.id === tournament.organizer_id;
   const minRank = getRankById(tournament.min_rank_id);
   const maxRank = getRankById(tournament.max_rank_id);
-  const activeCount = registrations.filter((r) => r.status !== "withdrawn").length;
-  const spotsLeft = tournament.max_participants - activeCount;
-  // This is a Server Component — it runs once per request, so reading the
-  // current time here is correct, not a render-purity hazard the lint
-  // rule is meant to catch (that rule targets Client Component re-renders).
-  // eslint-disable-next-line react-hooks/purity
-  const registrationClosed = new Date(tournament.registration_closes_at).getTime() < Date.now();
-
-  const myRegistrations =
-    !isOrganizer && currentUser ? await getMyRegistrations(id, currentUser.id) : [];
-  const myActive = myRegistrations.find((r) => r.status !== "withdrawn");
-  const managedTeams =
-    !isOrganizer && currentUser && !myActive && tournament.entry_type === "team"
-      ? await getManagedTeams(currentUser.id)
-      : [];
-
-  const canRegister =
-    !isOrganizer &&
-    currentUser &&
-    !myActive &&
-    tournament.status === "open" &&
-    !registrationClosed &&
-    spotsLeft > 0;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -142,7 +111,7 @@ export default async function TournamentPage({ params }: { params: Params }) {
               </p>
             ) : null}
             <p className="font-body text-parchment-dim">
-              Spots: <span className="text-parchment">{activeCount}/{tournament.max_participants}</span>
+              Field size: <span className="text-parchment">up to {tournament.max_participants}</span>
             </p>
           </div>
 
@@ -154,54 +123,35 @@ export default async function TournamentPage({ params }: { params: Params }) {
 
           <DecoDivider className="my-8" />
 
-          {!isOrganizer ? (
-            <div className="mb-8">
-              <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
-                {myActive ? "Your registration" : "Register"}
-              </p>
-              {!currentUser ? (
-                <div>
-                  <p className="font-body text-sm text-parchment-dim">
-                    Sign in to register.
-                  </p>
-                  <Link
-                    href={`/login?next=/tournaments/${tournament.id}`}
-                    className={cn(buttonVariants(), "bg-brass text-primary-foreground hover:bg-brass/90 mt-4")}
-                  >
-                    Sign In
-                  </Link>
-                </div>
-              ) : myActive ? (
-                <div className="flex items-center gap-3">
-                  <span className="font-label text-xs tracking-widest text-parchment-dim uppercase">
-                    {myActive.status}
-                    {myActive.team ? ` · ${myActive.team.name}` : ""}
-                  </span>
-                  <WithdrawButton tournamentId={tournament.id} registrationId={myActive.id} />
-                </div>
-              ) : canRegister ? (
-                <RegisterForm
-                  tournamentId={tournament.id}
-                  entryType={tournament.entry_type}
-                  teams={managedTeams}
-                />
-              ) : (
-                <p className="font-body text-sm text-parchment-dim">
-                  {tournament.status !== "open"
-                    ? "Registration isn't open."
-                    : registrationClosed
-                      ? "Registration has closed."
-                      : "This tournament is full."}
-                </p>
-              )}
-            </div>
-          ) : null}
-
-          <div>
+          <div className="text-center">
             <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
-              Participants
+              Sign Up
             </p>
-            <ParticipantList registrations={registrations} />
+            {tournament.signup_url ? (
+              <>
+                <Link
+                  href={tournament.signup_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "bg-brass text-primary-foreground hover:bg-brass/90",
+                  )}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Sign Up
+                </Link>
+                <p className="font-body mt-3 text-xs text-parchment-dim">
+                  Signups are run by the organizer, off ScrimLock.
+                </p>
+              </>
+            ) : (
+              <p className="font-body text-sm text-parchment-dim">
+                {isOrganizer
+                  ? "Add a signup link from the manage page so people know where to register."
+                  : "The organizer hasn't posted a signup link yet — check back soon."}
+              </p>
+            )}
           </div>
         </div>
       </div>

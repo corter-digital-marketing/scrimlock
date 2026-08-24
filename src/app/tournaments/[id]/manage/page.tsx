@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { getTournamentById, getRegistrations } from "@/lib/supabase/tournaments";
+import { getTournamentById } from "@/lib/supabase/tournaments";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { updateTournamentAction } from "@/lib/actions/tournaments";
 import { TournamentForm } from "@/components/tournaments/tournament-form";
 import { StatusControl } from "@/components/tournaments/manage/status-control";
-import { ManageRegistrations } from "@/components/tournaments/manage/manage-registrations";
 import { DeleteTournamentButton } from "@/components/tournaments/manage/delete-tournament-button";
 import { DecoDivider } from "@/components/site/deco-divider";
 
@@ -22,8 +21,6 @@ export default async function ManageTournamentPage({ params }: { params: Params 
   const tournament = await getTournamentById(id);
   if (!tournament) notFound();
   if (tournament.organizer_id !== user.id) redirect(`/tournaments/${id}`);
-
-  const registrations = await getRegistrations(id);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -44,7 +41,7 @@ export default async function ManageTournamentPage({ params }: { params: Params 
         </p>
         <p className="font-body mt-2 mb-4 text-sm text-parchment-dim">
           Draft tournaments aren&apos;t visible to anyone else. Open it up
-          when you&apos;re ready for registrations.
+          when you&apos;re ready for people to see it and sign up.
         </p>
         <StatusControl tournamentId={tournament.id} status={tournament.status} />
       </div>
@@ -62,22 +59,13 @@ export default async function ManageTournamentPage({ params }: { params: Params 
         </div>
       </div>
 
-      <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
-        <p className="font-label text-xs tracking-widest text-verdigris uppercase">
-          Registrations
-        </p>
-        <div className="mt-5">
-          <ManageRegistrations tournamentId={id} registrations={registrations} />
-        </div>
-      </div>
-
       <div className="frame-brass mt-8 rounded-sm border-oxblood/40 bg-surface px-6 py-8 sm:px-10">
         <p className="font-label text-xs tracking-widest text-oxblood uppercase">
           Danger zone
         </p>
         <p className="font-body mt-2 text-sm text-parchment-dim">
-          Deleting a tournament removes it and every registration. This
-          can&apos;t be undone.
+          Deleting a tournament removes its listing entirely. This can&apos;t
+          be undone.
         </p>
         <div className="mt-4">
           <DeleteTournamentButton tournamentId={tournament.id} title={tournament.title} />

@@ -11,6 +11,7 @@ import {
 } from "@/lib/supabase/pug-parties";
 import { getMyActiveMatch, getMyQueueEntry, getQueueCounts } from "@/lib/supabase/pug-matches";
 import { tryFormMatch } from "@/lib/pug-matchmaker";
+import { getPugActivityStats, type PugActivityStats } from "@/lib/pug-stats";
 import { isPugRegion } from "@/lib/pug-regions";
 import { PartyInvitesBanner } from "@/components/pug/party-invites-banner";
 import { PartyPanel } from "@/components/pug/party-panel";
@@ -23,7 +24,13 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "PUG" };
 export const dynamic = "force-dynamic";
 
-function PugHero({ children }: { children: ReactNode }) {
+function PugHero({
+  stats,
+  children,
+}: {
+  stats: PugActivityStats;
+  children: ReactNode;
+}) {
   return (
     <section className="deco-corners relative overflow-hidden border-b border-brass-dim/40 bg-surface">
       <SigilMark
@@ -43,6 +50,25 @@ function PugHero({ children }: { children: ReactNode }) {
         <p className="font-body mx-auto mt-4 max-w-lg text-parchment-dim">
           Solo or with a party — 6v6, matched as fast as the queue allows.
         </p>
+
+        <div className="mx-auto mt-6 flex w-fit items-center gap-6 rounded-sm border border-brass-dim/40 bg-void/40 px-6 py-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-verdigris" strokeWidth={1.5} />
+            <span className="font-display text-lg text-parchment">{stats.totalQueued}</span>
+            <span className="font-label text-parchment-dim text-[10px] tracking-widest uppercase">
+              queueing
+            </span>
+          </div>
+          <span className="h-6 w-px bg-brass-dim/40" />
+          <div className="flex items-center gap-2">
+            <Swords className="h-4 w-4 text-brass" strokeWidth={1.5} />
+            <span className="font-display text-lg text-parchment">{stats.activeMatches}</span>
+            <span className="font-label text-parchment-dim text-[10px] tracking-widest uppercase">
+              live {stats.activeMatches === 1 ? "match" : "matches"}
+            </span>
+          </div>
+        </div>
+
         {children}
       </div>
     </section>
@@ -53,8 +79,9 @@ export default async function PugPage() {
   const user = await getCurrentUser();
 
   if (!user) {
+    const stats = await getPugActivityStats();
     return (
-      <PugHero>
+      <PugHero stats={stats}>
         <Link
           href="/login?next=/pug"
           className={cn(buttonVariants({ size: "lg" }), "bg-brass text-primary-foreground hover:bg-brass/90 mt-8 shadow-[0_0_0_1px_var(--brass-dim)]")}
@@ -76,10 +103,11 @@ export default async function PugPage() {
     myQueueEntry = await getMyQueueEntry(user.id);
   }
 
-  const [activeParty, partyInvites, queueCounts] = await Promise.all([
+  const [activeParty, partyInvites, queueCounts, stats] = await Promise.all([
     getActiveParty(user.id),
     getPartyInvites(user.id),
     getQueueCounts(),
+    getPugActivityStats(),
   ]);
 
   const invitableFriends =
@@ -94,7 +122,7 @@ export default async function PugPage() {
     <div>
       <PugAutoRefresh />
 
-      <PugHero>
+      <PugHero stats={stats}>
         <Link
           href="/pug/leaderboard"
           className="font-label text-brass-dim hover:text-brass mt-6 inline-flex items-center gap-1.5 text-xs tracking-widest uppercase transition-colors"

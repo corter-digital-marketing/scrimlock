@@ -69,6 +69,7 @@ function extractFormFields(formData: FormData) {
     maxRankId: maxRankId && maxRankId !== "any" ? maxRankId : undefined,
     startsAt: formData.get("startsAt"),
     registrationClosesAt: formData.get("registrationClosesAt"),
+    signupUrl: formData.get("signupUrl") || undefined,
     banner: banner instanceof File && banner.size > 0 ? banner : undefined,
   };
 }
@@ -102,6 +103,7 @@ export async function createTournamentAction(
       max_rank_id: parsed.data.maxRankId ?? null,
       starts_at: parsed.data.startsAt,
       registration_closes_at: parsed.data.registrationClosesAt,
+      signup_url: parsed.data.signupUrl || null,
       status: "draft",
     })
     .select("id")
@@ -161,6 +163,7 @@ export async function updateTournamentAction(
       max_rank_id: parsed.data.maxRankId ?? null,
       starts_at: parsed.data.startsAt,
       registration_closes_at: parsed.data.registrationClosesAt,
+      signup_url: parsed.data.signupUrl || null,
       ...(bannerUrl ? { banner_url: bannerUrl } : {}),
     })
     .eq("id", tournamentId);
@@ -194,131 +197,6 @@ export async function setTournamentStatusAction(formData: FormData): Promise<Sim
 
   revalidatePath(`/tournaments/${tournamentId}`);
   revalidatePath(`/tournaments/${tournamentId}/manage`);
-}
-
-export async function registerAction(
-  _prevState: TournamentActionState,
-  formData: FormData,
-): Promise<TournamentActionState> {
-  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
-
-  const tournamentId = formData.get("tournamentId");
-  if (typeof tournamentId !== "string") return { error: "Missing tournament." };
-
-  const { supabase, user } = await requireUser();
-  if (!user) redirect(`/login?next=/tournaments/${tournamentId}`);
-
-  const { data: tournament } = await supabase
-    .from("tournaments")
-    .select("status, entry_type, max_participants, registration_closes_at")
-    .eq("id", tournamentId)
-    .maybeSingle();
-
-  if (!tournament) return { error: "This tournament no longer exists." };
-  if (tournament.status !== "open") return { error: "Registration isn't open." };
-  if (new Date(tournament.registration_closes_at).getTime() < Date.now()) {
-    return { error: "Registration has closed." };
-  }
-
-  const { count } = await supabase
-    .from("tournament_registrations")
-    .select("id", { count: "exact", head: true })
-    .eq("tournament_id", tournamentId)
-    .in("status", ["pending", "confirmed"]);
-
-  if ((count ?? 0) >= tournament.max_participants) {
-    return { error: "This tournament is full." };
-  }
-
-  const teamId = formData.get("teamId");
-  const isTeamEntry = tournament.entry_type === "team";
-
-  if (isTeamEntry && typeof teamId !== "string") {
-    return { error: "Choose a team to register." };
-  }
-
-  const { error } = await supabase.from("tournament_registrations").insert({
-    tournament_id: tournamentId,
-    user_id: isTeamEntry ? null : user.id,
-    team_id: isTeamEntry ? (teamId as string) : null,
-  });
-
-  if (error) {
-    return error.code === "23505"
-      ? { error: "Already registered." }
-      : { error: "Couldn't register. Please try again." };
-  }
-
-  revalidatePath(`/tournaments/${tournamentId}`);
-  return null;
-}
-
-export async function withdrawAction(formData: FormData): Promise<SimpleActionResult> {
-  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
-
-  const tournamentId = formData.get("tournamentId");
-  const registrationId = formData.get("registrationId");
-  if (typeof tournamentId !== "string" || typeof registrationId !== "string") {
-    return { error: "Missing tournament or registration." };
-  }
-
-  const { supabase, user } = await requireUser();
-  if (!user) return { error: "Not signed in." };
-
-  await supabase
-    .from("tournament_registrations")
-    .update({ status: "withdrawn" })
-    .eq("id", registrationId);
-
-  revalidatePath(`/tournaments/${tournamentId}`);
-}
-
-export async function confirmRegistrationAction(formData: FormData): Promise<SimpleActionResult> {
-  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
-
-  const tournamentId = formData.get("tournamentId");
-  const registrationId = formData.get("registrationId");
-  if (typeof tournamentId !== "string" || typeof registrationId !== "string") {
-    return { error: "Missing tournament or registration." };
-  }
-
-  const { supabase, user } = await requireUser();
-  if (!user) return { error: "Not signed in." };
-  if (!(await requireOrganizer(supabase, tournamentId, user.id))) {
-    return { error: "Only the organizer can confirm registrations." };
-  }
-
-  await supabase
-    .from("tournament_registrations")
-    .update({ status: "confirmed" })
-    .eq("id", registrationId);
-
-  revalidatePath(`/tournaments/${tournamentId}/manage`);
-  revalidatePath(`/tournaments/${tournamentId}`);
-}
-
-export async function rejectRegistrationAction(formData: FormData): Promise<SimpleActionResult> {
-  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
-
-  const tournamentId = formData.get("tournamentId");
-  const registrationId = formData.get("registrationId");
-  if (typeof tournamentId !== "string" || typeof registrationId !== "string") {
-    return { error: "Missing tournament or registration." };
-  }
-
-  const { supabase, user } = await requireUser();
-  if (!user) return { error: "Not signed in." };
-  if (!(await requireOrganizer(supabase, tournamentId, user.id))) {
-    return { error: "Only the organizer can reject registrations." };
-  }
-
-  await supabase
-    .from("tournament_registrations")
-    .update({ status: "withdrawn" })
-    .eq("id", registrationId);
-
-  revalidatePath(`/tournaments/${tournamentId}/manage`);
-  revalidatePath(`/tournaments/${tournamentId}`);
 }
 
 export async function deleteTournamentAction(formData: FormData) {

@@ -109,6 +109,29 @@ export function TournamentForm({
         ) : null}
       </div>
 
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="signupUrl" className={fieldLabelClass()}>
+          Signup link
+        </Label>
+        <Input
+          id="signupUrl"
+          name="signupUrl"
+          type="url"
+          placeholder="https://discord.gg/… or a signup form link"
+          defaultValue={tournament?.signup_url ?? ""}
+          className="border-brass-dim/60 bg-surface-2"
+          aria-invalid={!!state?.fieldErrors?.signupUrl}
+        />
+        <p className="font-body text-xs text-parchment-dim">
+          Where people actually sign up — Discord, a form, wherever you&apos;re
+          running it. ScrimLock only advertises the tournament; this is shown
+          as the &quot;Sign Up&quot; button.
+        </p>
+        {state?.fieldErrors?.signupUrl ? (
+          <p className="text-xs text-oxblood">{state.fieldErrors.signupUrl[0]}</p>
+        ) : null}
+      </div>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="format" className={fieldLabelClass()}>
