@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Coffee } from "lucide-react";
 import { SigilMark } from "@/components/site/sigil-mark";
 import { primaryNavLinks, secondaryNavLinks } from "@/lib/nav-links";
+import { PAYPAL_DONATE_URL } from "@/lib/site-config";
 
 export function SiteFooter() {
   return (
@@ -58,14 +60,25 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">
           <p className="font-body">
             &copy; {new Date().getFullYear()} ScrimLock. Deadlock is a
             trademark of Valve Corporation.
           </p>
-          <p className="font-label tracking-widest uppercase">
-            Built by players, for players
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href={PAYPAL_DONATE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-label transition-weighted flex items-center gap-1.5 tracking-widest text-brass uppercase hover:underline"
+            >
+              <Coffee className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Buy Me a Coffee
+            </Link>
+            <p className="font-label tracking-widest uppercase">
+              Built by players, for players
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Trophy, Swords, UserSearch, Search, MessageCircle, Coffee, Bug } from "lucide-react";
+import { Trophy, Swords, UserSearch, Search, MessageCircle, Bug } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { SigilMark } from "@/components/site/sigil-mark";
@@ -7,10 +7,7 @@ import { DecoDivider } from "@/components/site/deco-divider";
 import { BugReportForm } from "@/components/site/bug-report-form";
 import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import { PUG_LETTER_RANKS } from "@/lib/pug-elo";
-
-// TODO: swap in the real invite/donate links.
-const DISCORD_INVITE_URL = "https://discord.gg/your-invite";
-const PAYPAL_DONATE_URL = "https://paypal.me/your-username";
+import { DISCORD_INVITE_URL } from "@/lib/site-config";
 
 const tabCards = [
   {
@@ -223,48 +220,21 @@ export default function Home() {
         <DecoDivider />
       </div>
 
-      {/* Bug reports + support */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div className="frame-brass rounded-sm bg-surface p-6 sm:p-8">
-            <div className="flex items-center gap-2.5">
-              <Bug className="h-5 w-5 text-oxblood" strokeWidth={1.5} />
-              <h2 className="font-display text-xl text-parchment">
-                Found a bug or an issue? Report it here.
-              </h2>
-            </div>
-            <p className="font-body mt-2 text-sm text-parchment-dim">
-              ScrimLock is in beta — something&apos;s going to break. Tell me
-              what happened and I&apos;ll fix it.
-            </p>
-            <div className="mt-6">
-              <BugReportForm />
-            </div>
+      {/* Bug reports */}
+      <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="frame-brass rounded-sm bg-surface p-6 sm:p-8">
+          <div className="flex items-center gap-2.5">
+            <Bug className="h-5 w-5 text-oxblood" strokeWidth={1.5} />
+            <h2 className="font-display text-xl text-parchment">
+              Found a bug or an issue? Report it here.
+            </h2>
           </div>
-
-          <div className="frame-brass flex flex-col items-start rounded-sm bg-surface p-6 sm:p-8">
-            <div className="flex items-center gap-2.5">
-              <Coffee className="h-5 w-5 text-brass" strokeWidth={1.5} />
-              <h2 className="font-display text-xl text-parchment">
-                Support the project
-              </h2>
-            </div>
-            <p className="font-body mt-2 text-sm text-parchment-dim">
-              ScrimLock is free and independently run. If it&apos;s useful to
-              you, buying me a coffee helps keep it running.
-            </p>
-            <Link
-              href={PAYPAL_DONATE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "bg-brass text-primary-foreground hover:bg-brass/90 mt-6",
-              )}
-            >
-              <Coffee className="h-4 w-4" />
-              Buy Me a Coffee
-            </Link>
+          <p className="font-body mt-2 text-sm text-parchment-dim">
+            ScrimLock is in beta — something&apos;s going to break. Tell me
+            what happened and I&apos;ll fix it.
+          </p>
+          <div className="mt-6">
+            <BugReportForm />
           </div>
         </div>
       </section>
