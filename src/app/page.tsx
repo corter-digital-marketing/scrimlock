@@ -49,12 +49,15 @@ export default function Home() {
           className="pointer-events-none absolute top-1/2 right-[-6rem] h-[36rem] w-[36rem] -translate-y-1/2 text-brass opacity-[0.05]"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
               The competitive hub for Deadlock
             </p>
-            <h1 className="font-display mt-4 flex flex-wrap items-center gap-3 text-5xl leading-[1.05] tracking-tight text-parchment sm:text-6xl">
-              Welcome to ScrimLock
+            <h1 className="font-display mt-4 flex flex-wrap items-center gap-3 leading-[1.05] tracking-tight text-parchment">
+              <span className="text-4xl whitespace-nowrap sm:text-5xl lg:text-6xl">
+                Welcome to{" "}
+                <span className="text-brass text-glow-brass">ScrimLock</span>
+              </span>
               <span className="font-label text-glow-brass rounded-sm border border-brass px-2 py-1 text-sm tracking-widest text-brass uppercase">
                 Beta
               </span>
