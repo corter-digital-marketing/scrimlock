@@ -33,6 +33,18 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+
+    // A PKCE code is single-use. If something (dev-mode double-fetch,
+    // a browser retry, a duplicate tab) causes this route to run twice
+    // for the same code, the first call already succeeded and set a
+    // real session cookie — the second call's exchange fails, but the
+    // user IS signed in. Check for that before showing an error.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      return NextResponse.redirect(`${origin}${next}`);
+    }
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth-callback-failed`);
