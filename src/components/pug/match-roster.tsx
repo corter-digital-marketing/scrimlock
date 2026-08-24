@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, Circle, Crown } from "lucide-react";
+import { Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { pugEloToRank } from "@/lib/pug-elo";
@@ -45,17 +45,18 @@ export function MatchRoster({
                   {(p.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              {rank?.icon ? (
-                <Image
-                  src={rank.icon}
-                  alt={rank.name}
-                  title={`${rank.name}${numeral ? ` ${numeral}` : ""}`}
-                  width={18}
-                  height={18}
-                  className="border-void bg-void absolute -right-1 -bottom-1 h-4.5 w-4.5 rounded-full border object-contain"
+              {showCheckIn ? (
+                <span
+                  aria-label={p.checked_in_at ? "Checked in" : "Not checked in"}
+                  title={p.checked_in_at ? "Checked in" : "Not checked in"}
+                  className={cn(
+                    "border-void absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2",
+                    p.checked_in_at ? "bg-verdigris" : "bg-parchment-dim/40",
+                  )}
                 />
               ) : null}
             </div>
+
             <div className="min-w-0 flex-1">
               {p.profile ? (
                 <Link
@@ -73,28 +74,39 @@ export function MatchRoster({
               ) : (
                 <span className="font-body text-sm text-parchment-dim">Unknown</span>
               )}
-              <span className="font-label text-[10px] tracking-widest text-parchment-dim uppercase">
-                {p.elo_before} ELO
-                {rank ? ` · ${rank.name}${numeral ? ` ${numeral}` : ""}` : ""}
-              </span>
             </div>
-            {delta !== null ? (
-              <span
-                className={cn(
-                  "font-label text-xs tracking-widest uppercase",
-                  delta > 0 ? "text-verdigris" : delta < 0 ? "text-oxblood" : "text-parchment-dim",
-                )}
-              >
-                {delta > 0 ? "+" : ""}
-                {delta}
-              </span>
-            ) : showCheckIn ? (
-              p.checked_in_at ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-verdigris" aria-label="Checked in" />
+
+            <div
+              className="flex shrink-0 flex-col items-center gap-1"
+              title={rank ? `${rank.name}${numeral ? ` ${numeral}` : ""}` : undefined}
+            >
+              {rank?.icon ? (
+                <div className="border-brass-dim/60 bg-void flex h-11 w-11 items-center justify-center rounded-full border shadow-[0_0_10px_-2px_color-mix(in_oklab,var(--brass)_50%,transparent)]">
+                  <Image
+                    src={rank.icon}
+                    alt={rank.name}
+                    width={40}
+                    height={40}
+                    className="h-9 w-9 object-contain"
+                  />
+                </div>
+              ) : null}
+              {delta !== null ? (
+                <span
+                  className={cn(
+                    "font-label text-[11px] tracking-widest",
+                    delta > 0 ? "text-verdigris" : delta < 0 ? "text-oxblood" : "text-parchment-dim",
+                  )}
+                >
+                  {delta > 0 ? "+" : ""}
+                  {delta}
+                </span>
               ) : (
-                <Circle className="h-4 w-4 shrink-0 text-parchment-dim/40" aria-label="Not checked in" />
-              )
-            ) : null}
+                <span className="font-label text-parchment-dim text-[11px] tracking-widest">
+                  {p.elo_before}
+                </span>
+              )}
+            </div>
           </li>
         );
       })}
