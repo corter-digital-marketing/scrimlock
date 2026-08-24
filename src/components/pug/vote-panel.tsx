@@ -33,23 +33,34 @@ export function VotePanel({
     <div className="flex flex-col items-center gap-3">
       <p className="font-body text-sm text-parchment-dim">
         Who won? First to {VOTES_TO_CONFIRM} votes locks it in.
+        {myVote !== null ? " Clicked the wrong one? You can change it below." : ""}
       </p>
       <div className="flex gap-4">
         <Button
           type="button"
-          disabled={pending || myVote !== null}
-          className="bg-brass text-primary-foreground hover:bg-brass/90"
+          disabled={pending}
+          variant={myVote === 1 ? undefined : "outline"}
+          className={
+            myVote === 1
+              ? "bg-brass text-primary-foreground hover:bg-brass/90"
+              : "border-brass text-brass hover:bg-brass/10"
+          }
           onClick={() => cast("1")}
         >
-          {myVote === 1 ? "You voted: " : ""}Team 1 ({team1Votes})
+          {myVote === 1 ? "✓ " : ""}Team 1 ({team1Votes})
         </Button>
         <Button
           type="button"
-          disabled={pending || myVote !== null}
-          className="bg-verdigris text-primary-foreground hover:bg-verdigris/90"
+          disabled={pending}
+          variant={myVote === 2 ? undefined : "outline"}
+          className={
+            myVote === 2
+              ? "bg-verdigris text-primary-foreground hover:bg-verdigris/90"
+              : "border-verdigris text-verdigris hover:bg-verdigris/10"
+          }
           onClick={() => cast("2")}
         >
-          {myVote === 2 ? "You voted: " : ""}Team 2 ({team2Votes})
+          {myVote === 2 ? "✓ " : ""}Team 2 ({team2Votes})
         </Button>
       </div>
     </div>

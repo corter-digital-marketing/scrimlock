@@ -7,8 +7,13 @@ export type PugMatchRow = Database["public"]["Tables"]["pug_matches"]["Row"];
 export type PugMatchPlayerRow = Database["public"]["Tables"]["pug_match_players"]["Row"];
 export type PugMatchVoteRow = Database["public"]["Tables"]["pug_match_votes"]["Row"];
 export type PugQueueEntryRow = Database["public"]["Tables"]["pug_queue_entries"]["Row"];
+export type PugMatchMessageRow = Database["public"]["Tables"]["pug_match_messages"]["Row"];
 
 export type MatchPlayerEntry = PugMatchPlayerRow & {
+  profile: { username: string; display_name: string; avatar_url: string | null } | null;
+};
+
+export type MatchMessageEntry = PugMatchMessageRow & {
   profile: { username: string; display_name: string; avatar_url: string | null } | null;
 };
 
@@ -50,6 +55,31 @@ export async function getMatchVotes(matchId: string): Promise<PugMatchVoteRow[]>
   const supabase = await createClient();
   const { data } = await supabase.from("pug_match_votes").select("*").eq("match_id", matchId);
   return data ?? [];
+}
+
+export async function getMatchMessages(matchId: string): Promise<MatchMessageEntry[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data: messages } = await supabase
+    .from("pug_match_messages")
+    .select("*")
+    .eq("match_id", matchId)
+    .order("created_at", { ascending: true });
+
+  const rows = messages ?? [];
+  if (rows.length === 0) return [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .in(
+      "id",
+      rows.map((r) => r.sender_id),
+    );
+  const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  return rows.map((r) => ({ ...r, profile: byId.get(r.sender_id) ?? null }));
 }
 
 /** An unresolved match (not yet completed) the user is currently part of. */

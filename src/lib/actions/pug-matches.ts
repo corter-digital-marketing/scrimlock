@@ -42,10 +42,55 @@ export async function postLobbyCodeAction(formData: FormData): Promise<SimpleAct
 
   const { error } = await supabase
     .from("pug_matches")
-    .update({ lobby_code: lobbyCode.trim(), status: "in_progress" })
+    .update({
+      lobby_code: lobbyCode.trim(),
+      status: "in_progress",
+      lobby_opened_at: new Date().toISOString(),
+    })
     .eq("id", matchId);
 
   if (error) return { error: "Couldn't save the code. Please try again." };
+
+  revalidatePath(`/pug/${matchId}`);
+}
+
+export async function checkInAction(formData: FormData): Promise<SimpleActionResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
+
+  const matchId = formData.get("matchId");
+  if (typeof matchId !== "string") return { error: "Missing match." };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { error: "Not signed in." };
+
+  const { error } = await supabase
+    .from("pug_match_players")
+    .update({ checked_in_at: new Date().toISOString() })
+    .eq("match_id", matchId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: "Couldn't check you in. Please try again." };
+
+  revalidatePath(`/pug/${matchId}`);
+}
+
+export async function sendMatchMessageAction(formData: FormData): Promise<SimpleActionResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED_ERROR };
+
+  const matchId = formData.get("matchId");
+  const body = formData.get("body");
+  if (typeof matchId !== "string") return { error: "Missing match." };
+  if (typeof body !== "string" || !body.trim()) return { error: "Message can't be empty." };
+  if (body.length > 500) return { error: "500 characters max." };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { error: "Not signed in." };
+
+  const { error } = await supabase
+    .from("pug_match_messages")
+    .insert({ match_id: matchId, sender_id: user.id, body: body.trim() });
+
+  if (error) return { error: "Couldn't send that message. Please try again." };
 
   revalidatePath(`/pug/${matchId}`);
 }
@@ -70,14 +115,18 @@ export async function voteAction(formData: FormData): Promise<SimpleActionResult
     .maybeSingle();
   if (!isPlayer) return { error: "Only players in this match can vote." };
 
+  // Upsert, not insert: a vote can be changed up until the match
+  // resolves (see the "voter changes their vote" RLS policy) — an
+  // accidental click on the wrong team shouldn't be permanent.
   const { error } = await supabase
     .from("pug_match_votes")
-    .insert({ match_id: matchId, voter_id: user.id, voted_team: Number(team) });
+    .upsert(
+      { match_id: matchId, voter_id: user.id, voted_team: Number(team) },
+      { onConflict: "match_id,voter_id" },
+    );
 
   if (error) {
-    return error.code === "23505"
-      ? { error: "You've already voted." }
-      : { error: "Couldn't record your vote. Please try again." };
+    return { error: "Couldn't record your vote. Please try again." };
   }
 
   await tryResolveMatch(matchId);

@@ -1,7 +1,7 @@
 import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { eloDelta, applyEloDelta } from "@/lib/pug-elo";
-import { VOTES_TO_CONFIRM } from "@/lib/pug-matchmaking";
+import { VOTES_TO_CONFIRM, LOBBY_CHECKIN_WINDOW_MS } from "@/lib/pug-matchmaking";
 
 /**
  * Checks whether either side has enough votes yet and, if so, applies
@@ -62,4 +62,34 @@ export async function tryResolveMatch(matchId: string): Promise<void> {
       completed_at: new Date().toISOString(),
     })
     .eq("id", matchId);
+}
+
+/**
+ * Cancels a match if the check-in window has passed with someone still
+ * not checked in. Opportunistic, same as tryFormMatch/tryResolveMatch —
+ * called from the match page on load, since there's no background job
+ * runner. Service-role: reading everyone's checked_in_at and writing
+ * match status isn't any one player's call to make.
+ */
+export async function tryExpireMatch(matchId: string): Promise<void> {
+  const supabase = createServiceClient();
+
+  const { data: match } = await supabase
+    .from("pug_matches")
+    .select("status, lobby_opened_at")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (!match || match.status !== "in_progress" || !match.lobby_opened_at) return;
+
+  const deadline = new Date(match.lobby_opened_at).getTime() + LOBBY_CHECKIN_WINDOW_MS;
+  if (Date.now() < deadline) return;
+
+  const { data: players } = await supabase
+    .from("pug_match_players")
+    .select("checked_in_at")
+    .eq("match_id", matchId);
+  const allCheckedIn = (players ?? []).length > 0 && (players ?? []).every((p) => p.checked_in_at);
+  if (allCheckedIn) return;
+
+  await supabase.from("pug_matches").update({ status: "cancelled" }).eq("id", matchId);
 }

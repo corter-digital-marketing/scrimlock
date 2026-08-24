@@ -1,7 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Crown } from "lucide-react";
+import { CheckCircle2, Circle, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { pugEloToRank } from "@/lib/pug-elo";
+import { getRankById, subrankToRoman } from "@/lib/ranks";
 import type { MatchPlayerEntry } from "@/lib/supabase/pug-matches";
 
 const TEAM_STYLE = {
@@ -14,11 +17,15 @@ export function MatchRoster({
   lobbyMakerId,
   team,
   won,
+  showCheckIn,
 }: {
   players: MatchPlayerEntry[];
   lobbyMakerId: string;
   team: 1 | 2;
   won?: boolean;
+  /** Show who's actually confirmed they're in the lobby — only meaningful
+   * once the code's been posted and check-in has opened. */
+  showCheckIn?: boolean;
 }) {
   const style = TEAM_STYLE[team];
 
@@ -26,14 +33,29 @@ export function MatchRoster({
     <ul className="flex flex-col divide-y divide-brass-dim/15">
       {players.map((p) => {
         const delta = p.elo_after !== null ? p.elo_after - p.elo_before : null;
+        const pugRank = pugEloToRank(p.elo_before);
+        const rank = getRankById(pugRank.rankId);
+        const numeral = subrankToRoman(pugRank.subrank);
         return (
           <li key={p.id} className="flex items-center gap-3 py-2.5">
-            <Avatar className={cn("border-2", style.ring)}>
-              {p.profile?.avatar_url ? <AvatarImage src={p.profile.avatar_url} alt="" /> : null}
-              <AvatarFallback className="font-label bg-surface-2 text-xs text-brass">
-                {(p.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative shrink-0">
+              <Avatar className={cn("border-2", style.ring)}>
+                {p.profile?.avatar_url ? <AvatarImage src={p.profile.avatar_url} alt="" /> : null}
+                <AvatarFallback className="font-label bg-surface-2 text-xs text-brass">
+                  {(p.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {rank?.icon ? (
+                <Image
+                  src={rank.icon}
+                  alt={rank.name}
+                  title={`${rank.name}${numeral ? ` ${numeral}` : ""}`}
+                  width={18}
+                  height={18}
+                  className="border-void bg-void absolute -right-1 -bottom-1 h-4.5 w-4.5 rounded-full border object-contain"
+                />
+              ) : null}
+            </div>
             <div className="min-w-0 flex-1">
               {p.profile ? (
                 <Link
@@ -53,6 +75,7 @@ export function MatchRoster({
               )}
               <span className="font-label text-[10px] tracking-widest text-parchment-dim uppercase">
                 {p.elo_before} ELO
+                {rank ? ` · ${rank.name}${numeral ? ` ${numeral}` : ""}` : ""}
               </span>
             </div>
             {delta !== null ? (
@@ -65,6 +88,12 @@ export function MatchRoster({
                 {delta > 0 ? "+" : ""}
                 {delta}
               </span>
+            ) : showCheckIn ? (
+              p.checked_in_at ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-verdigris" aria-label="Checked in" />
+              ) : (
+                <Circle className="h-4 w-4 shrink-0 text-parchment-dim/40" aria-label="Not checked in" />
+              )
             ) : null}
           </li>
         );

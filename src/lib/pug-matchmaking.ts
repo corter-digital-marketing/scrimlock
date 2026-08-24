@@ -14,6 +14,10 @@ export const TEAM_SIZE = 6;
  * immediately, no need to wait on stragglers. Lives here (not in the
  * server-only resolver) so client components can reference it too. */
 export const VOTES_TO_CONFIRM = 7;
+/** How long everyone has to check in once the lobby code is posted,
+ * before the match auto-cancels (see tryExpireMatch). Also lives here,
+ * client-safe, so the countdown UI can reference the same number. */
+export const LOBBY_CHECKIN_WINDOW_MS = 5 * 60 * 1000;
 const LOOKAHEAD_CAP = 30; // bound the selection search when the queue is large
 
 export type QueueUnit = {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Crown, Medal, Trophy } from "lucide-react";
 import { getPugLeaderboard } from "@/lib/supabase/pug-leaderboard";
+import { pugEloToRank } from "@/lib/pug-elo";
 import { getRankById } from "@/lib/ranks";
 import { RankBadge } from "@/components/site/rank-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
@@ -84,7 +85,8 @@ export default async function PugLeaderboardPage() {
         <ol className="frame-brass bg-surface divide-brass-dim/15 mt-8 divide-y rounded-sm">
           {entries.map((entry, i) => {
             const position = i + 1;
-            const rank = getRankById(entry.profile.rank_id);
+            const pugRank = pugEloToRank(entry.profile.pug_elo);
+            const rank = getRankById(pugRank.rankId);
             return (
               <li
                 key={entry.profile.id}
@@ -123,7 +125,7 @@ export default async function PugLeaderboardPage() {
                   <RankBadge
                     rankName={rank.name}
                     iconSrc={rank.icon}
-                    subrank={entry.profile.rank_subrank}
+                    subrank={pugRank.subrank}
                     size="sm"
                     className="hidden shrink-0 sm:flex"
                   />

@@ -18,7 +18,7 @@ export type TournamentStatus = "draft" | "open" | "closed" | "in_progress" | "co
 export type RegistrationStatus = "pending" | "confirmed" | "withdrawn";
 export type FriendshipStatus = "pending" | "accepted";
 export type PugPartyMemberStatus = "invited" | "active";
-export type PugMatchStatus = "lobby_pending" | "in_progress" | "completed";
+export type PugMatchStatus = "lobby_pending" | "in_progress" | "completed" | "cancelled";
 export type PugQueueStatus = "queued" | "matched";
 
 export type Database = {
@@ -76,6 +76,7 @@ export type Database = {
           status: PugMatchStatus;
           lobby_maker_id: string;
           lobby_code: string | null;
+          lobby_opened_at: string | null;
           winning_team: number | null;
           created_at: string;
           completed_at: string | null;
@@ -86,6 +87,7 @@ export type Database = {
           status?: PugMatchStatus;
           lobby_maker_id: string;
           lobby_code?: string | null;
+          lobby_opened_at?: string | null;
           winning_team?: number | null;
           created_at?: string;
           completed_at?: string | null;
@@ -96,6 +98,7 @@ export type Database = {
           status?: PugMatchStatus;
           lobby_maker_id?: string;
           lobby_code?: string | null;
+          lobby_opened_at?: string | null;
           winning_team?: number | null;
           created_at?: string;
           completed_at?: string | null;
@@ -110,6 +113,7 @@ export type Database = {
           team: number;
           elo_before: number;
           elo_after: number | null;
+          checked_in_at: string | null;
         };
         Insert: {
           id?: string;
@@ -118,6 +122,7 @@ export type Database = {
           team: number;
           elo_before: number;
           elo_after?: number | null;
+          checked_in_at?: string | null;
         };
         Update: {
           id?: string;
@@ -126,6 +131,31 @@ export type Database = {
           team?: number;
           elo_before?: number;
           elo_after?: number | null;
+          checked_in_at?: string | null;
+        };
+        Relationships: [];
+      };
+      pug_match_messages: {
+        Row: {
+          id: string;
+          match_id: string;
+          sender_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          match_id: string;
+          sender_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          match_id?: string;
+          sender_id?: string;
+          body?: string;
+          created_at?: string;
         };
         Relationships: [];
       };
