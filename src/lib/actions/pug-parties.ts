@@ -23,13 +23,19 @@ async function hasActiveParty(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
 ) {
+  // Not .maybeSingle(): if a race ever lets a user land in 2+ active
+  // parties at once (this is also now guarded by a DB-level unique
+  // index, but defense in depth), .maybeSingle() would surface that as
+  // an ambiguous-rows error, and this function only reads `data` — so
+  // it'd silently report "no active party" and let the bug compound
+  // itself indefinitely instead of blocking further party creation.
   const { data } = await supabase
     .from("pug_party_members")
     .select("id")
     .eq("user_id", userId)
     .eq("status", "active")
-    .maybeSingle();
-  return Boolean(data);
+    .limit(1);
+  return Boolean(data && data.length > 0);
 }
 
 export async function createPartyAction(formData: FormData): Promise<SimpleActionResult> {
