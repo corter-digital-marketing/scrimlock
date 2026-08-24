@@ -3,6 +3,8 @@ import { Coffee } from "lucide-react";
 import { SigilMark } from "@/components/site/sigil-mark";
 import { primaryNavLinks, secondaryNavLinks } from "@/lib/nav-links";
 import { PAYPAL_DONATE_URL } from "@/lib/site-config";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function SiteFooter() {
   return (
@@ -19,6 +21,18 @@ export function SiteFooter() {
                 An independent community hub for Deadlock competitive play.
                 Not affiliated with or endorsed by Valve Corporation.
               </p>
+              <Link
+                href={PAYPAL_DONATE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "bg-brass text-primary-foreground hover:bg-brass/90 mt-5",
+                )}
+              >
+                <Coffee className="h-4 w-4" />
+                Buy Me a Coffee
+              </Link>
             </div>
           </div>
 
@@ -60,25 +74,14 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">
           <p className="font-body">
             &copy; {new Date().getFullYear()} ScrimLock. Deadlock is a
             trademark of Valve Corporation.
           </p>
-          <div className="flex flex-wrap items-center gap-4">
-            <Link
-              href={PAYPAL_DONATE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-label transition-weighted flex items-center gap-1.5 tracking-widest text-brass uppercase hover:underline"
-            >
-              <Coffee className="h-3.5 w-3.5" strokeWidth={1.5} />
-              Buy Me a Coffee
-            </Link>
-            <p className="font-label tracking-widest uppercase">
-              Built by players, for players
-            </p>
-          </div>
+          <p className="font-label tracking-widest uppercase">
+            Built by players, for players
+          </p>
         </div>
       </div>
     </footer>
