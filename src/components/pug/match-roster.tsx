@@ -1,10 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { pugEloToRank } from "@/lib/pug-elo";
-import { getRankById, subrankToRoman } from "@/lib/ranks";
+import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import type { MatchPlayerEntry } from "@/lib/supabase/pug-matches";
 
 const TEAM_STYLE = {
@@ -33,9 +31,6 @@ export function MatchRoster({
     <ul className="flex flex-col divide-y divide-brass-dim/15">
       {players.map((p) => {
         const delta = p.elo_after !== null ? p.elo_after - p.elo_before : null;
-        const pugRank = pugEloToRank(p.elo_before);
-        const rank = getRankById(pugRank.rankId);
-        const numeral = subrankToRoman(pugRank.subrank);
         return (
           <li key={p.id} className="flex items-center gap-3 py-2.5">
             <div className="relative shrink-0">
@@ -76,21 +71,8 @@ export function MatchRoster({
               )}
             </div>
 
-            <div
-              className="flex shrink-0 flex-col items-center gap-1"
-              title={rank ? `${rank.name}${numeral ? ` ${numeral}` : ""}` : undefined}
-            >
-              {rank?.icon ? (
-                <div className="border-brass-dim/60 bg-void flex h-11 w-11 items-center justify-center rounded-full border shadow-[0_0_10px_-2px_color-mix(in_oklab,var(--brass)_50%,transparent)]">
-                  <Image
-                    src={rank.icon}
-                    alt={rank.name}
-                    width={40}
-                    height={40}
-                    className="h-9 w-9 object-contain"
-                  />
-                </div>
-              ) : null}
+            <div className="flex shrink-0 flex-col items-center gap-1">
+              <PugLetterBadge elo={p.elo_before} size="md" />
               {delta !== null ? (
                 <span
                   className={cn(

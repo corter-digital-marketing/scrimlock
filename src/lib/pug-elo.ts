@@ -25,32 +25,29 @@ export function applyEloDelta(currentElo: number, delta: number): number {
 }
 
 /**
- * PUG ELO shown as the same rank ladder as everywhere else on the site
- * (RANKS in lib/ranks.ts — Obscurus through Eternus, subranks I–VI),
- * instead of a bare number nobody has context for. 100 ELO per
- * subrank, 600 per rank — a clean win (+100) is roughly one subrank —
- * so Eternus VI opens up at 6100 ELO and just keeps climbing from
- * there. Below 100 is Obscurus (rank 0), which has no subranks, same
- * as the self-reported game rank.
+ * PUG's own letter-grade ladder — deliberately separate from the
+ * self-reported Deadlock rank (RANKS in lib/ranks.ts): this measures
+ * PUG results specifically, not in-game skill, so it gets its own
+ * simple S/A/B/C/D scale rather than borrowing Deadlock's 12-tier
+ * ladder. 500 ELO per letter (~5 clean wins) — Unranked is the literal
+ * starting point (0 ELO, nobody's played a match yet or they're net
+ * even), S opens up at 2500 and climbs from there.
  */
-export const PUG_ELO_PER_SUBRANK = 100;
-const SUBRANKS_PER_RANK = 6;
-const MAX_RANK_ID = 11; // Eternus
-const MAX_STEP = (MAX_RANK_ID - 1 + 1) * SUBRANKS_PER_RANK; // 66 — caps at Eternus VI
+export const PUG_LETTER_RANKS = [
+  { letter: "Unranked", minElo: 0, color: "#8f8570" },
+  { letter: "D", minElo: 500, color: "#b89b3f" },
+  { letter: "C", minElo: 1000, color: "#4d7c4a" },
+  { letter: "B", minElo: 1500, color: "#4a728f" },
+  { letter: "A", minElo: 2000, color: "#c9a35c" },
+  { letter: "S", minElo: 2500, color: "#a83232" },
+] as const;
 
-export function pugEloToRank(elo: number): { rankId: number; subrank: number | null } {
-  if (elo < PUG_ELO_PER_SUBRANK) return { rankId: 0, subrank: null };
+export type PugLetterRank = (typeof PUG_LETTER_RANKS)[number];
 
-  const step = Math.min(MAX_STEP, Math.floor(elo / PUG_ELO_PER_SUBRANK));
-  const rankId = Math.floor((step - 1) / SUBRANKS_PER_RANK) + 1;
-  const subrank = ((step - 1) % SUBRANKS_PER_RANK) + 1;
-  return { rankId, subrank };
-}
-
-/** The ELO a rank+subrank first opens up at — inverse of pugEloToRank,
- * mainly for showing "X ELO to next rank" type hints. */
-export function eloForPugRank(rankId: number, subrank: number | null): number {
-  if (rankId <= 0) return 0;
-  const step = (rankId - 1) * SUBRANKS_PER_RANK + (subrank ?? 1);
-  return step * PUG_ELO_PER_SUBRANK;
+export function pugEloToLetterRank(elo: number): PugLetterRank {
+  let result: PugLetterRank = PUG_LETTER_RANKS[0];
+  for (const tier of PUG_LETTER_RANKS) {
+    if (elo >= tier.minElo) result = tier;
+  }
+  return result;
 }

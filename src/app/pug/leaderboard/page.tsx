@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Crown, Medal, Trophy } from "lucide-react";
 import { getPugLeaderboard } from "@/lib/supabase/pug-leaderboard";
-import { pugEloToRank } from "@/lib/pug-elo";
-import { getRankById } from "@/lib/ranks";
-import { RankBadge } from "@/components/site/rank-badge";
+import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { SigilMark } from "@/components/site/sigil-mark";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -85,8 +83,6 @@ export default async function PugLeaderboardPage() {
         <ol className="frame-brass bg-surface divide-brass-dim/15 mt-8 divide-y rounded-sm">
           {entries.map((entry, i) => {
             const position = i + 1;
-            const pugRank = pugEloToRank(entry.profile.pug_elo);
-            const rank = getRankById(pugRank.rankId);
             return (
               <li
                 key={entry.profile.id}
@@ -121,15 +117,7 @@ export default async function PugLeaderboardPage() {
                   </p>
                 </div>
 
-                {rank ? (
-                  <RankBadge
-                    rankName={rank.name}
-                    iconSrc={rank.icon}
-                    subrank={pugRank.subrank}
-                    size="sm"
-                    className="hidden shrink-0 sm:flex"
-                  />
-                ) : null}
+                <PugLetterBadge elo={entry.profile.pug_elo} size="sm" className="hidden sm:flex" />
 
                 <div className="shrink-0 text-right">
                   <p className="font-display text-brass text-xl">{entry.profile.pug_elo}</p>

@@ -159,6 +159,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      bug_reports: {
+        Row: {
+          id: string;
+          reporter_id: string | null;
+          email: string | null;
+          message: string;
+          page_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reporter_id?: string | null;
+          email?: string | null;
+          message: string;
+          page_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          reporter_id?: string | null;
+          email?: string | null;
+          message?: string;
+          page_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       pug_match_votes: {
         Row: {
           id: string;
