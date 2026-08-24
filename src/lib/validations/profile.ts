@@ -28,7 +28,6 @@ export const profileSchema = z
     region: z.enum(REGIONS).optional(),
     timezone: z.string().trim().max(64, "64 characters max").optional(),
     rankId: z.coerce.number().int().min(0).max(11).optional(),
-    rankSubrank: z.coerce.number().int().min(1).max(6).optional(),
     preferredHeroes: z
       .array(z.string().uuid())
       .max(MAX_PREFERRED_HEROES, `Pick up to ${MAX_PREFERRED_HEROES} heroes`),
@@ -42,13 +41,6 @@ export const profileSchema = z
         "PNG, JPEG, WebP, or GIF only",
       )
       .optional(),
-  })
-  .refine(
-    (data) =>
-      data.rankId === undefined ||
-      data.rankId === 0 ||
-      data.rankSubrank !== undefined,
-    { message: "Pick a subrank", path: ["rankSubrank"] },
-  );
+  });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

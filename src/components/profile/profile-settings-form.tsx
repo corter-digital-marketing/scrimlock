@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useRef, useState } from "react";
 import { updateProfileAction, type ProfileActionState } from "@/lib/actions/profile";
-import { RANKS, subrankToRoman, rankSelectItems, subrankSelectItems } from "@/lib/ranks";
+import { RANKS, rankSelectItems } from "@/lib/ranks";
 import { REGIONS } from "@/lib/regions";
 import type { ProfileRow } from "@/lib/supabase/profiles";
 import type { HeroOption } from "@/lib/supabase/heroes";
@@ -53,9 +53,6 @@ export function ProfileSettingsForm({
   const [rankId, setRankId] = useState<string>(
     profile.rank_id != null ? String(profile.rank_id) : "none",
   );
-  const [rankSubrank, setRankSubrank] = useState<string>(
-    profile.rank_subrank != null ? String(profile.rank_subrank) : "none",
-  );
 
   const timezones = useMemo(() => {
     try {
@@ -65,7 +62,6 @@ export function ProfileSettingsForm({
     }
   }, []);
 
-  const showSubrank = rankId !== "none" && rankId !== "0";
   const initials = (profile.display_name || profile.username || "?")
     .slice(0, 2)
     .toUpperCase();
@@ -283,17 +279,14 @@ export function ProfileSettingsForm({
           Rank
         </p>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="max-w-xs">
           <div className="flex flex-col gap-1.5">
             <Label className={fieldLabelClass()}>Rank</Label>
             <Select
               name="rankId"
               value={rankId}
               items={rankSelectItems({ value: "none", label: "Not set" })}
-              onValueChange={(v) => {
-                setRankId(v as string);
-                if (v === "none" || v === "0") setRankSubrank("none");
-              }}
+              onValueChange={(v) => setRankId(v as string)}
             >
               <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
                 <SelectValue placeholder="Not set" />
@@ -307,30 +300,6 @@ export function ProfileSettingsForm({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label className={fieldLabelClass()}>Subrank</Label>
-            <Select
-              name="rankSubrank"
-              value={rankSubrank}
-              items={subrankSelectItems({ value: "none", label: "Not set" })}
-              onValueChange={(v) => setRankSubrank(v as string)}
-              disabled={!showSubrank}
-            >
-              <SelectTrigger className="w-full border-brass-dim/60 bg-surface-2">
-                <SelectValue placeholder="Not set" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Not set</SelectItem>
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {subrankToRoman(n)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FieldError messages={state?.fieldErrors?.rankSubrank} />
           </div>
         </div>
       </section>

@@ -36,7 +36,6 @@ export async function updateProfileAction(
     v && v !== "none" ? v : undefined;
 
   const rankId = orNone(formData.get("rankId"));
-  const rankSubrank = orNone(formData.get("rankSubrank"));
   const region = orNone(formData.get("region"));
   const avatarFile = formData.get("avatar");
 
@@ -53,7 +52,6 @@ export async function updateProfileAction(
     region,
     timezone: formData.get("timezone") || undefined,
     rankId,
-    rankSubrank,
     preferredHeroes: formData.getAll("preferredHeroes"),
     playstyleNote: formData.get("playstyleNote") || undefined,
     isLft: formData.get("isLft") === "on",
@@ -98,7 +96,10 @@ export async function updateProfileAction(
       region: profileFields.region || null,
       timezone: profileFields.timezone || null,
       rank_id: profileFields.rankId ?? null,
-      rank_subrank: profileFields.rankId ? (profileFields.rankSubrank ?? null) : null,
+      // Subrank picking was removed from the edit form (just "Rank" now) —
+      // always null it out going forward rather than leave a stale value
+      // nobody can update anymore.
+      rank_subrank: null,
       preferred_heroes: profileFields.preferredHeroes,
       playstyle_note: profileFields.playstyleNote || null,
       is_lft: profileFields.isLft,

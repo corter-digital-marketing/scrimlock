@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/supabase/auth";
 import { getFriendship, getFriends } from "@/lib/supabase/friends";
 import { getRankById } from "@/lib/ranks";
 import { RankBadge } from "@/components/site/rank-badge";
+import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { FriendButton } from "@/components/profile/friend-button";
 import { MessageButton } from "@/components/messages/message-button";
@@ -154,7 +155,7 @@ export default async function ProfilePage({ params }: { params: Params }) {
 
         <DecoDivider className="my-8" />
 
-        <div className="grid gap-8 sm:grid-cols-[auto_1fr]">
+        <div className="grid gap-8 sm:grid-cols-[auto_auto_1fr]">
           <div>
             <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
               Rank
@@ -169,6 +170,18 @@ export default async function ProfilePage({ params }: { params: Params }) {
             ) : (
               <p className="font-body text-sm text-parchment-dim">Not set</p>
             )}
+          </div>
+
+          <div>
+            <p className="font-label mb-3 text-xs tracking-widest text-brass-dim uppercase">
+              PUG Rank
+            </p>
+            <div className="flex flex-col items-center gap-1.5">
+              <PugLetterBadge elo={profile.pug_elo} size="lg" />
+              <span className="font-label text-parchment-dim text-[10px] tracking-widest uppercase">
+                {profile.pug_elo} ELO
+              </span>
+            </div>
           </div>
 
           <div>
