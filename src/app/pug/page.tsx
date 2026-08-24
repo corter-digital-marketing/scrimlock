@@ -40,8 +40,8 @@ function PugHero({
       <div className="relative mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">
         <div className="mx-auto flex items-center justify-center gap-3">
           <Swords className="h-6 w-6 text-verdigris" strokeWidth={1.5} />
-          <p className="font-label text-xs tracking-[0.35em] text-verdigris uppercase">
-            PUG Scrims
+          <p className="font-label text-sm tracking-[0.3em] text-verdigris uppercase sm:text-base">
+            Deadlock PUGs
           </p>
         </div>
         <h1 className="font-display mt-3 text-4xl text-parchment sm:text-5xl">
