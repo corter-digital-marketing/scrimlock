@@ -11,7 +11,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Region } from "@/lib/regions";
 
-export const metadata: Metadata = { title: "Teams" };
+export const metadata: Metadata = {
+  title: "Deadlock Teams",
+  description: "Browse Deadlock teams recruiting players, or create your own team and open a roster spot.",
+};
 export const dynamic = "force-dynamic";
 
 async function TeamsList({

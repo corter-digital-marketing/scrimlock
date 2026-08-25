@@ -11,13 +11,29 @@ import { LocalDateTime } from "@/components/site/local-datetime";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site";
 
 type Params = Promise<{ id: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
   const tournament = await getTournamentById(id);
-  return { title: tournament?.title ?? "Tournament" };
+  if (!tournament) return { title: "Tournament" };
+
+  const description =
+    tournament.description?.slice(0, 155) ??
+    `${tournament.title} — a ${tournament.region} Deadlock tournament${tournament.prize_pool ? ` with a ${tournament.prize_pool} prize pool` : ""}. See details and sign up.`;
+
+  return {
+    title: tournament.title,
+    description,
+    alternates: { canonical: `/tournaments/${tournament.id}` },
+    // Draft tournaments are deliberately left out of the public /tournaments
+    // listing (see getTournaments) — keep them out of search results too,
+    // even though the page itself is still reachable by direct link.
+    robots: tournament.status === "draft" ? { index: false, follow: false } : undefined,
+    openGraph: { title: tournament.title, description },
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -44,8 +60,43 @@ export default async function TournamentPage({ params }: { params: Params }) {
   const minRank = getRankById(tournament.min_rank_id);
   const maxRank = getRankById(tournament.max_rank_id);
 
+  // Event structured data — eligible for Google's event rich results
+  // (date, organizer, "sign up" link shown right in search). Skipped for
+  // drafts, which are noindexed anyway.
+  const jsonLd =
+    tournament.status === "draft"
+      ? null
+      : {
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: tournament.title,
+          description: tournament.description ?? `A ${tournament.region} Deadlock tournament.`,
+          startDate: tournament.starts_at,
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+          location: {
+            "@type": "VirtualLocation",
+            url: tournament.signup_url || `${SITE_URL}/tournaments/${tournament.id}`,
+          },
+          ...(tournament.banner_url ? { image: [tournament.banner_url] } : {}),
+          organizer: organizer
+            ? {
+                "@type": "Person",
+                name: organizer.display_name,
+                url: `${SITE_URL}/profile/${organizer.username}`,
+              }
+            : undefined,
+          url: `${SITE_URL}/tournaments/${tournament.id}`,
+        };
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      {jsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      ) : null}
       <div className="frame-brass overflow-hidden rounded-sm bg-surface">
         {tournament.banner_url ? (
           <div className="relative h-48 w-full border-b border-brass-dim/40">

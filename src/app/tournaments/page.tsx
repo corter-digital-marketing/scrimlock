@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 import type { Region } from "@/lib/regions";
 import type { TournamentStatus } from "@/lib/supabase/database.types";
 
-export const metadata: Metadata = { title: "Tournaments" };
+export const metadata: Metadata = {
+  title: "Deadlock Tournaments",
+  description:
+    "Browse upcoming Deadlock tournaments by region, rank, and format, or list your own tournament to advertise signups.",
+};
 export const dynamic = "force-dynamic";
 
 async function TournamentsList({

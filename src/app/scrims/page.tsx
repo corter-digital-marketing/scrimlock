@@ -11,7 +11,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Region } from "@/lib/regions";
 
-export const metadata: Metadata = { title: "Scrims" };
+export const metadata: Metadata = {
+  title: "Deadlock Scrims",
+  description:
+    "Find and post Deadlock scrims. Browse open scrim listings by region and rank, or post your own to line up a practice match.",
+};
 export const dynamic = "force-dynamic";
 
 async function ScrimsList({

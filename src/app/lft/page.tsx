@@ -8,7 +8,11 @@ import { PlayerCard } from "@/components/lft/player-card";
 import { TeamCard } from "@/components/teams/team-card";
 import type { Region } from "@/lib/regions";
 
-export const metadata: Metadata = { title: "LFT" };
+export const metadata: Metadata = {
+  title: "Deadlock LFT — Looking for Team",
+  description:
+    "Browse Deadlock players looking for a team and teams looking for players. Filter by region, rank, and hero pool to find your next roster spot.",
+};
 export const dynamic = "force-dynamic";
 
 async function PlayersView({

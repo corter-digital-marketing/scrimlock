@@ -21,7 +21,11 @@ import { SigilMark } from "@/components/site/sigil-mark";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "PUG" };
+export const metadata: Metadata = {
+  title: "Deadlock PUGs — Matchmaking Queue",
+  description:
+    "Queue for Deadlock PUGs solo or with a party. 6v6 pickup matches, matched as fast as the queue allows, with ELO tracking and a leaderboard.",
+};
 export const dynamic = "force-dynamic";
 
 function PugHero({

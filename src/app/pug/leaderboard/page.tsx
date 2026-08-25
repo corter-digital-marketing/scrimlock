@@ -8,7 +8,10 @@ import { SigilMark } from "@/components/site/sigil-mark";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "PUG Leaderboard" };
+export const metadata: Metadata = {
+  title: "Deadlock PUG Leaderboard",
+  description: "See the top-ranked Deadlock PUG players by ELO, from Unranked up to S rank.",
+};
 export const dynamic = "force-dynamic";
 
 const POSITION_STYLE: Record<number, { icon: typeof Crown; className: string }> = {
