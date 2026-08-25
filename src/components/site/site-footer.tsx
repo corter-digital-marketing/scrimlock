@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { Coffee } from "lucide-react";
 import { SigilMark } from "@/components/site/sigil-mark";
+import { FooterCallouts } from "@/components/site/footer-callouts";
 import { primaryNavLinks, secondaryNavLinks } from "@/lib/nav-links";
-import { PAYPAL_DONATE_URL } from "@/lib/site-config";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export function SiteFooter() {
   return (
@@ -21,18 +18,6 @@ export function SiteFooter() {
                 An independent community hub for Deadlock competitive play.
                 Not affiliated with or endorsed by Valve Corporation.
               </p>
-              <Link
-                href={PAYPAL_DONATE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "bg-brass text-primary-foreground hover:bg-brass/90 mt-5",
-                )}
-              >
-                <Coffee className="h-4 w-4" />
-                Buy Me a Coffee
-              </Link>
             </div>
           </div>
 
@@ -72,6 +57,10 @@ export function SiteFooter() {
               </ul>
             </div>
           </div>
+        </div>
+
+        <div className="mt-10 border-t border-brass-dim/20 pt-8">
+          <FooterCallouts />
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-brass-dim/20 pt-6 text-xs text-parchment-dim sm:flex-row sm:items-center sm:justify-between">

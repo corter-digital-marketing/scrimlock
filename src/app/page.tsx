@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { Trophy, Swords, UserSearch, Search, MessageCircle, Bug } from "lucide-react";
+import { Trophy, Swords, UserSearch, Search, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { SigilMark } from "@/components/site/sigil-mark";
 import { DecoDivider } from "@/components/site/deco-divider";
-import { BugReportForm } from "@/components/site/bug-report-form";
 import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import { PUG_LETTER_RANKS } from "@/lib/pug-elo";
 import { DISCORD_INVITE_URL } from "@/lib/site-config";
@@ -216,28 +215,9 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <DecoDivider />
       </div>
-
-      {/* Bug reports */}
-      <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="frame-brass rounded-sm bg-surface p-6 sm:p-8">
-          <div className="flex items-center gap-2.5">
-            <Bug className="h-5 w-5 text-oxblood" strokeWidth={1.5} />
-            <h2 className="font-display text-xl text-parchment">
-              Found a bug or an issue? Report it here.
-            </h2>
-          </div>
-          <p className="font-body mt-2 text-sm text-parchment-dim">
-            ScrimLock is in beta — something&apos;s going to break. Tell me
-            what happened and I&apos;ll fix it.
-          </p>
-          <div className="mt-6">
-            <BugReportForm />
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
