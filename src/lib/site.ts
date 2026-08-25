@@ -3,12 +3,12 @@
  * blurb — reused by root metadata, robots.ts, sitemap.ts, JSON-LD, and
  * the dynamic OG image so they can't drift out of sync with each other.
  *
- * Set NEXT_PUBLIC_SITE_URL in Vercel once a custom domain is attached
- * (e.g. https://scrimlock.gg) — everything here picks it up automatically.
- * Until then it falls back to the Vercel deployment URL.
+ * NEXT_PUBLIC_SITE_URL overrides this — set it in Vercel's Preview
+ * environment (to that deployment's own vercel.app URL) if preview
+ * builds should self-reference instead of pointing at production.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://scrimlock.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://scrimlock.com"
 ).replace(/\/$/, "");
 
 export const SITE_NAME = "ScrimLock";
