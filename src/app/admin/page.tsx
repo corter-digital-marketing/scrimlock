@@ -33,6 +33,16 @@ export default async function AdminPage() {
             Add heroes as Valve releases them, retire ones that get removed.
           </p>
         </Link>
+        <Link
+          href="/admin/bug-reports"
+          className="rounded-sm px-4 py-3 transition-weighted hover:bg-surface-2"
+        >
+          <p className="font-display text-parchment">Bug Reports</p>
+          <p className="font-body text-sm text-parchment-dim">
+            Everything submitted through the footer&apos;s &quot;Found a
+            Bug?&quot; box.
+          </p>
+        </Link>
       </div>
 
       <p className="font-body mt-6 text-center text-xs text-parchment-dim">
