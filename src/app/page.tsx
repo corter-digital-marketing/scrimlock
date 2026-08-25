@@ -50,7 +50,7 @@ export default function Home() {
               The competitive hub for Deadlock
             </p>
             <h1 className="font-display mt-4 flex flex-wrap items-center gap-3 leading-[1.05] tracking-tight text-parchment">
-              <span className="text-4xl whitespace-nowrap sm:text-5xl lg:text-6xl">
+              <span className="text-3xl sm:text-5xl sm:whitespace-nowrap lg:text-6xl">
                 Welcome to{" "}
                 <span className="text-brass text-glow-brass">ScrimLock</span>
               </span>
