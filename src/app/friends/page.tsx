@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { getFriends, getIncomingFriendRequests } from "@/lib/supabase/friends";
 import { FriendRequestsList } from "@/components/friends/friend-requests-list";
+import { FriendSearch } from "@/components/friends/friend-search";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -32,6 +33,13 @@ export default async function FriendsPage() {
 
       <div className="frame-brass mt-10 rounded-sm bg-surface px-6 py-8 sm:px-10">
         <p className="font-label mb-4 text-xs tracking-widest text-brass-dim uppercase">
+          Find Players
+        </p>
+        <FriendSearch />
+      </div>
+
+      <div className="frame-brass mt-8 rounded-sm bg-surface px-6 py-8 sm:px-10">
+        <p className="font-label mb-4 text-xs tracking-widest text-brass-dim uppercase">
           Requests
         </p>
         <FriendRequestsList requests={requests} />
@@ -43,7 +51,7 @@ export default async function FriendsPage() {
         </p>
         {friends.length === 0 ? (
           <p className="font-body text-sm text-parchment-dim">
-            No friends yet — visit a profile and add one.
+            No friends yet — search for someone above to add them.
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-brass-dim/20">

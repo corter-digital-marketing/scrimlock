@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { searchPlayers, type PlayerSearchResult } from "@/lib/supabase/friends";
 
 export type SimpleActionResult = { error?: string } | void;
 
@@ -15,6 +16,17 @@ async function requireUser() {
     data: { user },
   } = await supabase.auth.getUser();
   return { supabase, user };
+}
+
+/**
+ * Called directly from FriendSearch's onChange (debounced client-side),
+ * not bound to a form — Server Actions don't have to be form actions.
+ */
+export async function searchPlayersAction(query: string): Promise<PlayerSearchResult[]> {
+  if (!isSupabaseConfigured()) return [];
+  const { user } = await requireUser();
+  if (!user) return [];
+  return searchPlayers(user.id, query);
 }
 
 export async function sendFriendRequestAction(formData: FormData): Promise<SimpleActionResult> {
