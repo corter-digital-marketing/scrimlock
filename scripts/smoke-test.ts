@@ -118,6 +118,20 @@ async function main() {
     assert("profiles auto-created on signup (handle_new_user trigger)", Boolean(data));
   }
 
+  // guard_profile_privileges: the blanket "users update their own
+  // profile" policy has no column restriction, so is_admin needs its
+  // own trigger the same way pug_elo does (tested further down) —
+  // regression coverage for a real privilege-escalation bug fixed in
+  // 20260826160000_guard_profile_is_admin.sql.
+  {
+    await u0.client.from("profiles").update({ is_admin: true }).eq("id", u0.id);
+    const { data: check } = await admin.from("profiles").select("is_admin").eq("id", u0.id).single();
+    assert(
+      "guard_profile_privileges trigger blocks a player from self-granting is_admin",
+      check?.is_admin === false,
+    );
+  }
+
   // ---------------------------------------------------------------
   // TEAMS
   // ---------------------------------------------------------------
