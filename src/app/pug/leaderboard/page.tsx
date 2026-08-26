@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Crown, Medal, Trophy } from "lucide-react";
 import { getPugLeaderboard } from "@/lib/supabase/pug-leaderboard";
+import { PUG_LETTER_RANKS } from "@/lib/pug-elo";
 import { PugLetterBadge } from "@/components/pug/pug-letter-badge";
 import { DecoDivider } from "@/components/site/deco-divider";
 import { SigilMark } from "@/components/site/sigil-mark";
@@ -40,6 +41,11 @@ function PositionMarker({ position }: { position: number }) {
 
 export default async function PugLeaderboardPage() {
   const entries = await getPugLeaderboard(50);
+  // D is the first tier above the Unranked default — until someone
+  // actually crosses it, a "leaderboard" is just everyone tied at the
+  // starting line, so treat that the same as no entries at all.
+  const dThreshold = PUG_LETTER_RANKS[1].minElo;
+  const hasRankedPlayer = entries.some((entry) => entry.profile.pug_elo >= dThreshold);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -70,10 +76,10 @@ export default async function PugLeaderboardPage() {
 
       <DecoDivider className="mt-10" />
 
-      {entries.length === 0 ? (
+      {!hasRankedPlayer ? (
         <div className="frame-brass bg-surface mt-8 rounded-sm px-6 py-16 text-center">
           <p className="font-body text-parchment-dim">
-            Nobody&apos;s finished a PUG match yet — be the first.
+            Nobody&apos;s climbed past Unranked yet — be the first.
           </p>
           <Link
             href="/pug"
