@@ -224,6 +224,59 @@ async function main() {
       nameCheck?.name === "Smoke Test Squad",
       hijackErr?.message ?? "update silently no-opped (0 rows matched RLS)",
     );
+
+    // guard_team_owner_id / guard_team_member_owner_role: the same
+    // "blanket policy, no column restriction" bug as is_admin, but for
+    // team ownership — regression coverage for
+    // 20260826161500_guard_team_ownership.sql. u2 is promoted to
+    // captain here to play the attacker.
+    const { data: u2Member } = await admin
+      .from("team_members")
+      .select("id")
+      .eq("team_id", team.id)
+      .eq("user_id", u2.id)
+      .single();
+    await admin.from("team_members").update({ role_on_team: "captain" }).eq("id", u2Member!.id);
+
+    await u2.client.from("teams").update({ owner_id: u2.id }).eq("id", team.id);
+    const { data: ownerIdCheck } = await admin.from("teams").select("owner_id").eq("id", team.id).single();
+    assert("captain can't steal teams.owner_id via direct update", ownerIdCheck?.owner_id === u0.id);
+
+    await u2.client.from("team_members").update({ role_on_team: "owner" }).eq("id", u2Member!.id);
+    const { data: roleCheck } = await admin
+      .from("team_members")
+      .select("role_on_team")
+      .eq("id", u2Member!.id)
+      .single();
+    assert("captain can't self-promote role_on_team to owner", roleCheck?.role_on_team !== "owner");
+
+    await u2.client
+      .from("team_members")
+      .insert({ team_id: team.id, user_id: u5.id, role_on_team: "owner", status: "invited" });
+    const { data: accompliceRow } = await admin
+      .from("team_members")
+      .select("role_on_team")
+      .eq("team_id", team.id)
+      .eq("user_id", u5.id)
+      .maybeSingle();
+    assert(
+      "captain can't insert a new 'owner' row for an accomplice",
+      !accompliceRow || accompliceRow.role_on_team !== "owner",
+    );
+
+    const { data: ownerRow } = await admin
+      .from("team_members")
+      .select("id")
+      .eq("team_id", team.id)
+      .eq("user_id", u0.id)
+      .single();
+    await u2.client.from("team_members").delete().eq("id", ownerRow!.id);
+    const { data: ownerStillThere } = await admin
+      .from("team_members")
+      .select("id")
+      .eq("id", ownerRow!.id)
+      .maybeSingle();
+    assert("captain can't delete the owner's own team_members row", !!ownerStillThere);
   }
 
   // ---------------------------------------------------------------
