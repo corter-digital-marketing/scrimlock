@@ -310,6 +310,32 @@ async function main() {
       .from("friendships")
       .insert({ requester_id: u0.id, addressee_id: u4.id });
     assert("duplicate friend request rejected (unique constraint)", !!dupErr);
+
+    // guard_friendship_parties: "addressee accepts a pending request"
+    // only constrained addressee_id/status in its WITH CHECK, so the
+    // addressee could accept-and-hijack by also reassigning
+    // requester_id to fabricate a friendship a third party never
+    // consented to — regression coverage for
+    // 20260826162000_guard_friendship_parties.sql.
+    const { data: hijackReq } = await u6.client
+      .from("friendships")
+      .insert({ requester_id: u6.id, addressee_id: u7.id })
+      .select("id")
+      .single();
+    friendshipIds.push(hijackReq!.id);
+    await u7.client
+      .from("friendships")
+      .update({ status: "accepted", requester_id: u8.id })
+      .eq("id", hijackReq!.id);
+    const { data: hijackCheck } = await admin
+      .from("friendships")
+      .select("requester_id, status")
+      .eq("id", hijackReq!.id)
+      .single();
+    assert(
+      "guard_friendship_parties blocks reassigning requester_id while accepting",
+      hijackCheck?.requester_id === u6.id && hijackCheck?.status === "accepted",
+    );
   }
 
   // ---------------------------------------------------------------
