@@ -12,6 +12,7 @@ import { DecoDivider } from "@/components/site/deco-divider";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SITE_URL } from "@/lib/site";
+import { safeJsonLd } from "@/lib/json-ld";
 
 type Params = Promise<{ id: string }>;
 
@@ -94,7 +95,7 @@ export default async function TournamentPage({ params }: { params: Params }) {
       {jsonLd ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
       ) : null}
       <div className="frame-brass overflow-hidden rounded-sm bg-surface">

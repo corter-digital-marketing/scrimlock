@@ -6,6 +6,7 @@ import { GrainOverlay } from "@/components/site/grain-overlay";
 import { Toaster } from "@/components/ui/sonner";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
+import { safeJsonLd } from "@/lib/json-ld";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -112,7 +113,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="relative min-h-full flex flex-col bg-void text-parchment font-sans">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(JSON_LD) }}
         />
         <GrainOverlay />
         <SiteHeader user={user} />
